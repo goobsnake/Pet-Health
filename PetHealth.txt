@@ -1,0 +1,18 @@
+## Title: Pet Health
+## APIVersion: 100025
+## Author: |c0066FFGoobsnake|r
+## Contributors: Scootworks
+## Version: 1.00
+## SavedVariables: PetHealth_Save
+## OptionalDependsOn: LibStub LibCustomMenu LibAddonMenu-2.0  LibSlashCommander
+
+libs\LibStub\LibStub.lua
+
+libs\LibCustomMenu\LibCustomMenu.lua
+
+libs\LibSlashCommander\LibSlashCommander.lua
+
+lang\en.lua
+lang\$(language).lua
+
+PetHealth.lua

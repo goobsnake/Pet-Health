@@ -1,0 +1,546 @@
+local addon = {
+	name = "PetHealth",
+	displayName = "PetHealth",
+	savedVarVersion = 2,
+	api = {100025, nil},
+}
+
+local default = {
+    point = TOPLEFT,
+    relPoint = CENTER,
+    x = 0,
+    y = 0,
+	onlyInCombat = false,
+	showValues = true,
+	showLabels = true,
+	showBackground = true,
+	debug = false,
+}
+
+local UNIT_PLAYER_PET = "playerpet"
+local UNIT_PLAYER_TAG = "player"
+
+local LSC = LibStub("LibSlashCommander")
+
+local base, background, savedVars, savedVarCopy
+local currentPets = {}
+local window = {}
+local inCombatAddon = false
+
+local WINDOW_MANAGER = GetWindowManager()
+local WINDOW_WIDTH = 250
+local WINDOW_HEIGHT_ONE = 76
+local WINDOW_HEIGHT_TWO = 116
+local PET_BAR_FRAGMENT = nil
+
+
+----------
+-- UTIL --
+---------- 
+
+local function ChatOutput(message)
+	CHAT_SYSTEM:AddMessage(message)
+end
+
+local function GetPetNameLower(abilityId)
+	--[[
+	Um die Namen einfacher zu vergleichen, nur Kleinbuchstaben nutzen.
+	Zudem formatiert zo_strformat() den Namen ins richtige Format.
+	]]
+	return zo_strformat("<<z:1>>", GetAbilityName(abilityId))
+end
+
+local validPets = {
+	--[[
+	Da einige abilityNames nicht mit abilityId übereinstimmt,
+	müssen wir hier ein paar Sachen hardcoden.
+	]]
+	-- Familiar
+	[GetPetNameLower(18602)] = true,
+	-- Clannfear
+	["clannfear"] = true, -- en
+	["clannbann"] = true, -- de
+	["faucheclan"] = true, -- fr
+	-- Volatile Familiar
+	[GetPetNameLower(30678)] = true, -- en/de
+	-- Winged Twilight
+	[GetPetNameLower(30589)] = true,
+	["familier explosif"] = true, -- fr
+	-- Twilight Tormentor
+	[GetPetNameLower(30594)] = true, -- en
+	["zwielichtpeinigerin"] = true, -- de
+	["tourmenteur crépusculaire"] = true, -- fr
+	-- Twilight Matriarch
+	[GetPetNameLower(30629)] = true,
+	-- Feral Guardian
+	[GetPetNameLower(94376)] = true,
+	-- Eternal Guardian
+	[GetPetNameLower(94394)] = true,
+	-- Wild Guardian
+	[GetPetNameLower(94408)] = true,
+}
+
+local function IsUnitValidPet(unitTag)
+	--[[
+	Hier durchsuchen wir die Tabellen oben, ob wir den unitTag wirklich in unsere Tabelle aufnehmen.
+	]]
+	local unitName = zo_strformat("<<z:1>>", GetUnitName(unitTag))
+	return DoesUnitExist(unitTag) and validPets[unitName]
+end
+
+local function GetKeyWithData(unitTag)
+    --[[
+    Wir suchen nach dem table key.
+    ]]
+    for k, v in pairs(currentPets) do
+        if v.unitTag == unitTag then return k end
+    end
+    return nil
+end
+
+local function GetAlphaFromControl(savedVariable)
+	return (not savedVariable and 0) or 1
+end
+
+local function GetCombatState()
+	return not inCombatAddon and savedVarCopy.onlyInCombat
+end
+
+local function SetPetWindowHidden(hidden, combatState)
+	local setToHidden = hidden
+	if combatState then
+		setToHidden = true
+	end	
+	PET_BAR_FRAGMENT:SetHiddenForReason("NoPetOrOnlyInCombat", setToHidden)
+	-- debug
+	--ChatOutput(string.format("SetPetWindowHidden() setToHidden: %s, onlyInCombat: %s", tostring(setToHidden), tostring(onlyInCombat)))
+end
+
+local function RefreshPetWindow()
+	local countPets = #currentPets
+	local combatState = GetCombatState()
+	if PET_BAR_FRAGMENT:IsHidden() and countPets == 0 and combatState then return end
+	local height = 0
+	local setToHidden = true
+	if countPets > 0 then
+		if countPets == 1 then
+			height = WINDOW_HEIGHT_ONE
+			window[1]:SetHidden(false)
+			window[2]:SetHidden(true)
+			setToHidden = false
+		else
+			height = WINDOW_HEIGHT_TWO
+			window[1]:SetHidden(false)
+			window[2]:SetHidden(false)
+			setToHidden = false			
+		end
+	end	
+	base:SetHeight(height)
+	background:SetHeight(height)
+	-- set hidden state
+	SetPetWindowHidden(setToHidden, combatState)
+	-- debug
+	--ChatOutput(string.format("RefreshPetWindow() countPets: %d", countPets))
+end
+
+
+------------
+-- SHIELD --
+------------
+local function OnShieldUpdate(handler, unitTag, value, maxValue, initial)
+	--[[
+	Zeigt das Schadenschild des Begleiters an.
+	]]
+	local i = GetKeyWithData(unitTag)
+	if i == nil then
+		ChatOutput(string.format("OnShieldUpdate() unitTag: %s - pet not active", unitTag))
+		return
+	end
+	local ctrl = window[i].shield
+	if handler ~= nil then
+		if not ctrl:IsHidden() or value == 0 then
+			ctrl:SetHidden(true)
+		end
+	else
+		if ctrl:IsHidden() then
+			ctrl:SetHidden(false)
+		end
+	end
+	ZO_StatusBar_SmoothTransition(window[i].shield, value, maxValue, (initial == "true" and true or false))
+end
+
+local function GetShield(unitTag)
+	local value, maxValue = GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_POWER_SHIELDING, STAT_MITIGATION, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH)
+	if value == nil then
+		value = 0
+		maxValue = 0
+	end
+	OnShieldUpdate(_, unitTag, value, maxValue, "true")
+end
+
+
+------------
+-- HEALTH --
+------------
+local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
+	--[[
+	Zeigt das Leben des Begleiters an.
+	]]
+	local i = GetKeyWithData(unitTag)
+	if i == nil then
+		ChatOutput(string.format("OnHealthUpdate() unitTag: %s - pet not active", unitTag))
+		return
+	end
+	-- health values
+	window[i].values:SetText(ZO_FormatResourceBarCurrentAndMax(powerValue, powerMax))
+	-- health bar
+	ZO_StatusBar_SmoothTransition(window[i].healthbar, powerValue, powerMax, (initial == "true" and true or false))
+end
+
+local function GetHealth(unitTag)
+	local powerValue, powerMax = GetUnitPower(unitTag, POWERTYPE_HEALTH)
+	OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, "true")
+end
+
+
+-----------
+-- STATS --
+-----------
+local function GetControlText(control)
+	local controlText = control:GetText()
+	if controlText ~= nil then return controlText end
+	return ""
+end
+
+local function UpdatePetStats(unitTag)
+	local i = GetKeyWithData(unitTag)
+	if i == nil then
+		ChatOutput(string.format("UpdatePetStats() unitTag: %s - pet not active", unitTag))
+		return
+	end
+	local name = currentPets[i].unitName
+	local control = window[i].label
+	if GetControlText(control) ~= name then
+		window[i].label:SetText(name)
+	end
+	GetHealth(unitTag)
+	GetShield(unitTag)
+	-- debug
+	--ChatOutput(string.format("UpdatePetStats() unitTag: %s, name: %s", unitTag, name))
+end
+
+
+
+local function GetActivePets()
+	--[[
+	Hier werden alle Begleiter des Spielers ausgelesen und in die Begleitertabelle geschrieben.
+	]]
+	currentPets = {}
+	for i=1,7 do
+		local unitTag = UNIT_PLAYER_PET..i		
+		if IsUnitValidPet(unitTag) then
+			table.insert(currentPets, { unitTag = unitTag, unitName = GetUnitName(unitTag) })
+			zo_callLater(function() UpdatePetStats(unitTag) end, 50)
+		end
+	end
+	-- update
+	RefreshPetWindow()
+end
+
+-----------
+-- COMBAT --
+-----------
+local function OnPlayerCombatState(_, inCombat)
+	--[[
+	Setzt den Kampfstatus: in Kampf oder ausserhalb Kampf.
+	]]
+	inCombatAddon = inCombat
+	-- debug
+	--ChatOutput(string.format("OnPlayerCombatState() inCombat: %s, inCombatAddon: %s", tostring(inCombat), tostring(inCombatAddon)))
+	-- refresh
+	RefreshPetWindow()
+end
+
+
+--------------
+-- CONTROLS --
+--------------
+local function CreateControls()
+	-----------------
+	-- ADD CONTROL --
+	-----------------	
+	local function AddControl(parent, cType, level)
+		local c = WINDOW_MANAGER:CreateControl(nil, parent, cType)
+		c:SetDrawLayer(DL_OVERLAY)
+		c:SetDrawLevel(level)
+		return c, c
+	end
+	
+	---------------
+	-- TOP LAYER --
+	---------------
+	base = WINDOW_MANAGER:CreateTopLevelWindow(addon.name.."_TopLevel")
+	base:SetDimensions(WINDOW_WIDTH, WINDOW_HEIGHT_TWO)
+	base:SetAnchor(savedVars.point, GuiRoot, savedVars.relPoint, savedVars.x, savedVars.y)
+	base:SetMouseEnabled(true)
+	base:SetMovable(true)
+	base:SetDrawLayer(DL_OVERLAY)
+	base:SetDrawLevel(0)
+	base:SetHandler("OnMouseUp", function()
+		_, savedVars.point, _, savedVars.relPoint, savedVars.x, savedVars.y = base:GetAnchor(0)
+	end)
+	base:SetHidden(true)
+
+	----------------
+	-- BACKGROUND --
+	----------------
+	local INSET_BACKGROUND = 32
+	local baseWidth = base:GetWidth()
+	local baseHeight = base:GetHeight()
+	
+	background, ctrl = AddControl(base, CT_BACKDROP, 1)
+	ctrl:SetEdgeTexture("esoui/art/chatwindow/chat_bg_edge.dds", 256, 128, INSET_BACKGROUND)
+	ctrl:SetCenterTexture("esoui/art/chatwindow/chat_bg_center.dds")
+	ctrl:SetInsets(INSET_BACKGROUND, INSET_BACKGROUND, -INSET_BACKGROUND, -INSET_BACKGROUND)
+	ctrl:SetCenterColor(1,1,1,0.8)
+	ctrl:SetEdgeColor(1,1,1,0.8)	
+	ctrl:SetDimensions(baseWidth, baseHeight)
+	ctrl:SetAnchor(TOPLEFT)
+	ctrl:SetAlpha(GetAlphaFromControl(savedVars.showBackground))
+
+	--------------
+	-- PET BARS --
+	--------------
+	for i=1,2 do
+		-- frame
+		window[i], ctrl = AddControl(base, CT_BACKDROP, 5)
+		ctrl:SetDimensions(baseWidth*0.8, 36)
+		ctrl:SetCenterColor(1,0,1,0)
+		ctrl:SetEdgeColor(1,0,1,0)
+		ctrl:SetAnchor(CENTER, base)
+	
+		-- label
+		local windowHeight = window[i]:GetHeight()
+		window[i].label, ctrl = AddControl(window[i], CT_LABEL, 10)
+		ctrl:SetFont("$(BOLD_FONT)|$(KB_16)|soft-shadow-thin")
+		ctrl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
+		ctrl:SetDimensions(baseWidth, windowHeight*0.4)
+		ctrl:SetAnchor(TOPLEFT, window[i])
+		ctrl:SetAlpha(GetAlphaFromControl(savedVars.showLabels))
+		
+		-- border and background
+		window[i].border, ctrl = AddControl(window[i], CT_BACKDROP, 20)
+		ctrl:SetDimensions(window[i]:GetWidth(), windowHeight*0.45)
+		ctrl:SetCenterColor(0,0,0,.6)
+		ctrl:SetEdgeColor(1,1,1,0.4)
+		ctrl:SetEdgeTexture("", 1, 1, 1)
+		ctrl:SetAnchor(BOTTOM, window[i])
+		
+		-- healthbar
+		local borderWidth = window[i].border:GetWidth()
+		local borderHeight = window[i].border:GetHeight()
+		window[i].healthbar, ctrl = AddControl(window[i].border, CT_STATUSBAR, 30)
+		ctrl:SetColor(1,1,1,0.5)
+		ctrl:SetGradientColors(.45, .13, .13, 1, .85, .19, .19, 1)
+		ctrl:SetDimensions(borderWidth-2, borderHeight-2)
+		ctrl:SetAnchor(CENTER, window[i].border)
+		
+		-- shield
+		window[i].shield, ctrl = AddControl(window[i].healthbar, CT_STATUSBAR, 40)
+		ctrl:SetColor(1,1,1,0.5)
+		ctrl:SetGradientColors(.5, .5, 1, .3, .25, .25, .5, .5)
+		ctrl:SetDimensions(borderWidth-2, borderHeight-2)
+		ctrl:SetAnchor(CENTER, window[i].healthbar)
+		ctrl:SetValue(0)
+		ctrl:SetMinMax(0,1)
+
+		-- values
+		window[i].values, ctrl = AddControl(window[i].healthbar, CT_LABEL, 50)
+		ctrl:SetFont("$(BOLD_FONT)|$(KB_14)|soft-shadow-thin")
+		ctrl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
+		ctrl:SetAnchor(CENTER, window[i].healthbar)
+		ctrl:SetAlpha(GetAlphaFromControl(savedVars.showValues))
+		-- ctrl:SetHidden(not savedVarCopy.showValues or false)
+		
+		-- clear anchors to reset it
+		window[i]:ClearAnchors()
+	end
+
+	window[1]:SetAnchor(TOP, base, TOP, 0, 18)
+	window[2]:SetAnchor(TOP, window[1], BOTTOM, 0, 2)
+
+	-----------
+	-- SCENE --
+	-----------
+	PET_BAR_FRAGMENT = ZO_HUDFadeSceneFragment:New(base)
+	HUD_SCENE:AddFragment(PET_BAR_FRAGMENT)
+	HUD_UI_SCENE:AddFragment(PET_BAR_FRAGMENT)
+	PET_BAR_FRAGMENT:SetHiddenForReason("NoPetOrOnlyInCombat", true)
+end
+
+
+----------
+-- INIT --
+----------
+local function LoadEvents()
+	-- events
+	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_POWER_UPDATE, OnHealthUpdate)
+	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_UNIT_CREATED, function(_, unitTag)
+		if IsUnitValidPet(unitTag) then
+			table.insert(currentPets, { unitTag = unitTag, unitName = GetUnitName(unitTag) })
+			UpdatePetStats(unitTag)
+		end
+		RefreshPetWindow()
+	end)
+	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_UNIT_DESTROYED, function(_, unitTag)
+		local key = GetKeyWithData(unitTag)
+		if key ~= nil then
+			table.remove(currentPets, key)
+			-- debug
+			--ChatOutput(string.format("%s destroyed", unitTag))
+			-- refresh
+			local countPets = #currentPets
+			if countPets > 0 then
+				for i = 1, countPets do
+					local name = currentPets[i].unitName
+					local control = window[i].label
+					if GetControlText(control) ~= name then
+						window[i].label:SetText(name)
+					end
+					GetHealth(unitTag)
+					GetShield(unitTag)
+				end
+			end
+			RefreshPetWindow()
+		end	
+	end)
+	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_PLAYER_DEAD, GetActivePets)
+	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_UNIT_DEATH_STATE_CHANGE, GetActivePets)
+	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_ACTION_SLOT_ABILITY_SLOTTED, GetActivePets)
+	-- event filters
+	EVENT_MANAGER:AddFilterForEvent(addon.name, EVENT_POWER_UPDATE, REGISTER_FILTER_UNIT_TAG_PREFIX, UNIT_PLAYER_PET)
+	EVENT_MANAGER:AddFilterForEvent(addon.name, EVENT_UNIT_CREATED, REGISTER_FILTER_UNIT_TAG_PREFIX, UNIT_PLAYER_PET)
+	EVENT_MANAGER:AddFilterForEvent(addon.name, EVENT_UNIT_DESTROYED, REGISTER_FILTER_UNIT_TAG_PREFIX, UNIT_PLAYER_PET)
+	EVENT_MANAGER:AddFilterForEvent(addon.name, EVENT_PLAYER_DEAD, REGISTER_FILTER_UNIT_TAG, UNIT_PLAYER_TAG)
+	EVENT_MANAGER:AddFilterForEvent(addon.name, EVENT_UNIT_DEATH_STATE_CHANGE, REGISTER_FILTER_UNIT_TAG, UNIT_PLAYER_TAG)
+	-- shield
+	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_UNIT_ATTRIBUTE_VISUAL_ADDED, function(_, unitTag, unitAttributeVisual, _, _, _, value, maxValue)
+		if unitAttributeVisual == ATTRIBUTE_VISUAL_POWER_SHIELDING then
+			OnShieldUpdate(nil, unitTag, value, maxValue, "true")
+		end
+	end)
+	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_UNIT_ATTRIBUTE_VISUAL_REMOVED, function(_, unitTag, unitAttributeVisual, _, _, _, value, maxValue)
+		if unitAttributeVisual == ATTRIBUTE_VISUAL_POWER_SHIELDING then
+			OnShieldUpdate("removed", unitTag, value, maxValue, "false")
+		end
+	end)
+	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_UNIT_ATTRIBUTE_VISUAL_UPDATED, function(_, unitTag, unitAttributeVisual, _, _, _, _, newValue, _, newMaxValue)
+		if unitAttributeVisual == ATTRIBUTE_VISUAL_POWER_SHIELDING then
+			OnShieldUpdate(nil, unitTag, newValue, newMaxValue, "false")
+		end
+	end)
+	-- shield filters
+	EVENT_MANAGER:AddFilterForEvent(addon.name, EVENT_UNIT_ATTRIBUTE_VISUAL_ADDED, REGISTER_FILTER_UNIT_TAG_PREFIX, UNIT_PLAYER_PET)
+	EVENT_MANAGER:AddFilterForEvent(addon.name, EVENT_UNIT_ATTRIBUTE_VISUAL_REMOVED, REGISTER_FILTER_UNIT_TAG_PREFIX, UNIT_PLAYER_PET)
+	EVENT_MANAGER:AddFilterForEvent(addon.name, EVENT_UNIT_ATTRIBUTE_VISUAL_UPDATED, REGISTER_FILTER_UNIT_TAG_PREFIX, UNIT_PLAYER_PET)
+	-- for changes the style of the values
+	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_INTERFACE_SETTING_CHANGED, GetActivePets)
+	EVENT_MANAGER:AddFilterForEvent(addon.name, EVENT_INTERFACE_SETTING_CHANGED, REGISTER_FILTER_SETTING_SYSTEM_TYPE, SETTING_TYPE_UI)
+	-- handles the in combat stuff
+	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_PLAYER_COMBAT_STATE, OnPlayerCombatState)
+	OnPlayerCombatState(_, IsUnitInCombat(UNIT_PLAYER_TAG))
+	-- zone changes
+	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_PLAYER_ACTIVATED, function() zo_callLater(function() GetActivePets() end, 75) end)
+end
+
+local function SlashCommands()
+
+	-- LSC:Register("/pethealthdebug", function()
+	-- 	savedVars.debug = not savedVars.debug
+	-- 	savedVarCopy.debug = savedVars.debug
+	-- 	if savedVarCopy.debug then
+	-- 		ChatOutput(string.format("%s %s!", GetString(SI_SETTINGSYSTEMPANEL6), GetString(SI_ADDONLOADSTATE2)))
+	-- 	else
+	-- 		ChatOutput(string.format("%s %s!", GetString(SI_SETTINGSYSTEMPANEL6), GetString(SI_ADDONLOADSTATE3)))
+	-- 	end
+	-- end, GetString(SI_PET_HEALTH_LSC_DEBUG))
+	
+	LSC:Register("/pethealthcombat", function()
+		savedVars.onlyInCombat = not savedVars.onlyInCombat
+		savedVarCopy.onlyInCombat = savedVars.onlyInCombat
+		if savedVarCopy.onlyInCombat then
+			ChatOutput(GetString(SI_PET_HEALTH_COMBAT_ACTIVATED))
+		else
+			ChatOutput(GetString(SI_PET_HEALTH_COMBAT_DEACTIVATED))
+		end
+		OnPlayerCombatState(_, IsUnitInCombat(UNIT_PLAYER_TAG))
+	end, GetString(SI_PET_HEALTH_LSC_COMBAT))
+	
+	LSC:Register("/pethealthvalues", function()
+		savedVars.showValues = not savedVars.showValues
+		savedVarCopy.showValues = savedVars.showValues
+		if savedVarCopy.showValues then
+			ChatOutput(GetString(SI_PET_HEALTH_VALUES_ACTIVATED))
+		else
+			ChatOutput(GetString(SI_PET_HEALTH_VALUES_DEACTIVATED))
+		end
+		for i=1,2 do
+			-- local alpha = GetAlphaFromControl(savedVars.showValues)
+			-- d(alpha)
+			window[i].values:SetAlpha(GetAlphaFromControl(savedVars.showValues))
+		end
+	end, GetString(SI_PET_HEALTH_LSC_VALUES))
+	
+	LSC:Register("/pethealthlabels", function()
+		savedVars.showLabels = not savedVars.showLabels
+		savedVarCopy.showLabels = savedVars.showLabels
+		if savedVarCopy.showLabels then
+			ChatOutput(GetString(SI_PET_HEALTH_LABELS_ACTIVATED))
+		else
+			ChatOutput(GetString(SI_PET_HEALTH_LABELS_DEACTIVATED))
+		end
+		for i=1,2 do
+			window[i].label:SetAlpha(GetAlphaFromControl(savedVars.showLabels))
+		end
+	end, GetString(SI_PET_HEALTH_LSC_LABELS))
+	
+	LSC:Register("/pethealthbackground", function()
+		savedVars.showBackground = not savedVars.showBackground
+		if savedVars.showBackground then
+			ChatOutput(GetString(SI_PET_HEALTH_BACKGROUND_ACTIVATED))
+		else
+			ChatOutput(GetString(SI_PET_HEALTH_BACKGROUND_DEACTIVATED))
+		end
+		background:SetAlpha(GetAlphaFromControl(savedVars.showBackground))
+	end, GetString(SI_PET_HEALTH_LSC_BACKGROUND))
+
+end
+
+local function OnAddOnLoaded(_, addonName)
+	if addonName ~= addon.name then return end
+	EVENT_MANAGER:UnregisterForEvent(addon.name, EVENT_ADD_ON_LOADED)
+		
+	-- savedVars
+	savedVars = ZO_SavedVars:NewAccountWide(addon.name .. "_Save", addon.savedVarVersion, nil, default)
+	savedVarCopy = savedVars -- during playing, it takes only the local savedVarCopy settings instead picking the savedVars
+
+	-- Das Addon ist nur für Zauberer und Hüter aktiv
+	local getUnitClassId = GetUnitClassId(UNIT_PLAYER_TAG)
+	if getUnitClassId ~= 2 and getUnitClassId ~= 4 then
+		-- debug
+		ChatOutput(GetString(SI_PET_HEALTH_CLASS))
+		return
+	end
+	
+	-- create ui
+	CreateControls()
+	-- do stuff
+	--GetActivePets()
+	SlashCommands()
+	LoadEvents()
+	
+	-- debug
+	ChatOutput("loaded")	
+end
+
+EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_ADD_ON_LOADED, OnAddOnLoaded)
