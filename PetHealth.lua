@@ -156,7 +156,7 @@ local function OnShieldUpdate(handler, unitTag, value, maxValue, initial)
 	]]
 	local i = GetKeyWithData(unitTag)
 	if i == nil then
-		ChatOutput(string.format("OnShieldUpdate() unitTag: %s - pet not active", unitTag))
+		--ChatOutput(string.format("OnShieldUpdate() unitTag: %s - pet not active", unitTag))
 		return
 	end
 	local ctrl = window[i].shield
@@ -191,7 +191,7 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 	]]
 	local i = GetKeyWithData(unitTag)
 	if i == nil then
-		ChatOutput(string.format("OnHealthUpdate() unitTag: %s - pet not active", unitTag))
+		--ChatOutput(string.format("OnHealthUpdate() unitTag: %s - pet not active", unitTag))
 		return
 	end
 	-- health values
@@ -218,7 +218,7 @@ end
 local function UpdatePetStats(unitTag)
 	local i = GetKeyWithData(unitTag)
 	if i == nil then
-		ChatOutput(string.format("UpdatePetStats() unitTag: %s - pet not active", unitTag))
+		--ChatOutput(string.format("UpdatePetStats() unitTag: %s - pet not active", unitTag))
 		return
 	end
 	local name = currentPets[i].unitName
