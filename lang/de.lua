@@ -13,3 +13,10 @@ SafeAddString(SI_PET_HEALTH_LSC_COMBAT , "Aktiviere/Deaktiviere das Begleiterfen
 SafeAddString(SI_PET_HEALTH_LSC_VALUES , "Aktiviere/Deaktiviere die Ressourcenanzeige der Begleiter. Diese müssen in den Einstellungen eingerichtet werden.")
 SafeAddString(SI_PET_HEALTH_LSC_LABELS , "Aktiviere/Deaktiviere die Namenanzeige der Begleiter.")
 SafeAddString(SI_PET_HEALTH_LSC_BACKGROUND , "Aktiviere/Deaktiviere den Hintergrund des Begleiterfensters.")
+
+--LAM Settings menu
+SafeAddString(SI_PET_HEALTH_DESC,				"Informationen über deine Begleiter")
+SafeAddString(SI_PET_HEALTH_SAVE_TYPE,			"Speicher Einstellungen")
+SafeAddString(SI_PET_HEALTH_SAVE_TYPE_TT,		"Wähle aus, ob due die Einstellungen für jeden Charakter individuell speichern möchtest, oder für alle Characktere identisch (Account weit)")
+SafeAddString(SI_PET_HEALTH_ACCOUNT_WIDE,		"Account weit")
+SafeAddString(SI_PET_HEALTH_EACH_CHAR,	 		"Jeder Charakter")

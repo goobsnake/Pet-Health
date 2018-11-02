@@ -1,18 +1,18 @@
 ## Title: Pet Health
 ## Description: Allows for in-game Pet Health bars!
-## APIVersion: 100025
+## APIVersion: 100025 100026
 ## Author: Scootworks & Goobsnake
-## Version: 1.01
+## AddOnVersion: 1.02
+## Version: 1.02
 ## SavedVariables: PetHealth_Save
-## OptionalDependsOn: LibStub LibCustomMenu LibAddonMenu-2.0  LibSlashCommander
+## DependsOn: LibStub LibSlashCommander
+## OptionalDependsOn: LibAddonMenu-2.0
 
-libs\LibStub\LibStub.lua
+##Libraries:
+##LibStub LibAddonMenu-2.0 LibCustomMenu and LibSlashCommander need to be installed as standalone version!
 
-libs\LibCustomMenu\LibCustomMenu.lua
+lang/en.lua
+lang/$(language).lua
 
-libs\LibSlashCommander\LibSlashCommander.lua
-
-lang\en.lua
-lang\$(language).lua
-
+PetHealth_settingsMenu.lua
 PetHealth.lua

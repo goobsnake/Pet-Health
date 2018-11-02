@@ -1,14 +1,25 @@
 --Elder Scrolls: Online addon (written in LUA) which adds persistent in-game health bars to all permanent pets. 
 --Original/base work of this addon was developed by SCOOTWORKS and I was granted permission by him to take over full development and distribution of this addon.
-
-local addon = {
-	name = "PetHealth",
-	displayName = "PetHealth",
-	savedVarVersion = 2,
-	api = {100025, nil},
+PetHealth = PetHealth or {}
+--The supported classes for this addon (ClassId from function GetUnitClassId("player"))
+PetHealth.supportedClasses = {
+	[2] = true,	-- Sorcerer
+	[4] = true, -- Warden
 }
+local addon = {
+	name 			= "PetHealth",
+	displayName 	= "PetHealth",
+    version         = "1.02",
+	savedVarName	= "PetHealth_Save",
+	savedVarVersion = 2,
+	lamDisplayName 	= "PetHealth",
+	lamAuthor		= "Scootworks, Goobsnake",
+	lamUrl			= "https://www.esoui.com/downloads/info1884-PetHealthMurkmire.html",
+}
+PetHealth.addonData = addon
 
 local default = {
+    saveMode = 1, -- Each character
     point = TOPLEFT,
     relPoint = CENTER,
     x = 0,
@@ -24,8 +35,9 @@ local UNIT_PLAYER_PET = "playerpet"
 local UNIT_PLAYER_TAG = "player"
 
 local LSC = LibStub("LibSlashCommander")
+PetHealth.LAM = LibStub("LibAddonMenu-2.0")
 
-local base, background, savedVars, savedVarCopy
+local base, background, savedVars--, savedVarCopy
 local currentPets = {}
 local window = {}
 local inCombatAddon = false
@@ -106,7 +118,7 @@ local function GetAlphaFromControl(savedVariable)
 end
 
 local function GetCombatState()
-	return not inCombatAddon and savedVarCopy.onlyInCombat
+	return not inCombatAddon and savedVars.onlyInCombat
 end
 
 local function SetPetWindowHidden(hidden, combatState)
@@ -290,7 +302,8 @@ local function CreateControls()
 	base:SetDrawLayer(DL_OVERLAY)
 	base:SetDrawLevel(0)
 	base:SetHandler("OnMouseUp", function()
-		_, savedVars.point, _, savedVars.relPoint, savedVars.x, savedVars.y = base:GetAnchor(0)
+		local a, b
+		a, savedVars.point, b, savedVars.relPoint, savedVars.x, savedVars.y = base:GetAnchor(0)
 	end)
 	base:SetHidden(true)
 
@@ -300,7 +313,8 @@ local function CreateControls()
 	local INSET_BACKGROUND = 32
 	local baseWidth = base:GetWidth()
 	local baseHeight = base:GetHeight()
-	
+	local ctrl
+
 	background, ctrl = AddControl(base, CT_BACKDROP, 1)
 	ctrl:SetEdgeTexture("esoui/art/chatwindow/chat_bg_edge.dds", 256, 128, INSET_BACKGROUND)
 	ctrl:SetCenterTexture("esoui/art/chatwindow/chat_bg_center.dds")
@@ -363,7 +377,7 @@ local function CreateControls()
 		ctrl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
 		ctrl:SetAnchor(CENTER, window[i].healthbar)
 		ctrl:SetAlpha(GetAlphaFromControl(savedVars.showValues))
-		-- ctrl:SetHidden(not savedVarCopy.showValues or false)
+		-- ctrl:SetHidden(not savedVars.showValues or false)
 		
 		-- clear anchors to reset it
 		window[i]:ClearAnchors()
@@ -456,12 +470,35 @@ local function LoadEvents()
 	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_PLAYER_ACTIVATED, function() zo_callLater(function() GetActivePets() end, 75) end)
 end
 
+function PetHealth.changeCombatState()
+    OnPlayerCombatState(_, IsUnitInCombat(UNIT_PLAYER_TAG))
+end
+
+
+function PetHealth.changeBackground(toValue)
+    background:SetAlpha(GetAlphaFromControl(toValue))
+end
+
+function PetHealth.changeValues(toValue)
+    for i=1,2 do
+        -- local alpha = GetAlphaFromControl(savedVars.showValues)
+        -- d(alpha)
+        window[i].values:SetAlpha(GetAlphaFromControl(toValue))
+    end
+end
+
+function PetHealth.changeLabels(toValue)
+    for i=1,2 do
+        window[i].label:SetAlpha(GetAlphaFromControl(toValue))
+    end
+end
+
 local function SlashCommands()
 
 	-- LSC:Register("/pethealthdebug", function()
 	-- 	savedVars.debug = not savedVars.debug
-	-- 	savedVarCopy.debug = savedVars.debug
-	-- 	if savedVarCopy.debug then
+	-- 	savedVars.debug = savedVars.debug
+	-- 	if savedVars.debug then
 	-- 		ChatOutput(string.format("%s %s!", GetString(SI_SETTINGSYSTEMPANEL6), GetString(SI_ADDONLOADSTATE2)))
 	-- 	else
 	-- 		ChatOutput(string.format("%s %s!", GetString(SI_SETTINGSYSTEMPANEL6), GetString(SI_ADDONLOADSTATE3)))
@@ -470,41 +507,35 @@ local function SlashCommands()
 	
 	LSC:Register("/pethealthcombat", function()
 		savedVars.onlyInCombat = not savedVars.onlyInCombat
-		savedVarCopy.onlyInCombat = savedVars.onlyInCombat
-		if savedVarCopy.onlyInCombat then
+		--savedVars.onlyInCombat = savedVars.onlyInCombat
+		if savedVars.onlyInCombat then
 			ChatOutput(GetString(SI_PET_HEALTH_COMBAT_ACTIVATED))
 		else
 			ChatOutput(GetString(SI_PET_HEALTH_COMBAT_DEACTIVATED))
 		end
-		OnPlayerCombatState(_, IsUnitInCombat(UNIT_PLAYER_TAG))
+        PetHealth.changeCombatState()
 	end, GetString(SI_PET_HEALTH_LSC_COMBAT))
 	
 	LSC:Register("/pethealthvalues", function()
 		savedVars.showValues = not savedVars.showValues
-		savedVarCopy.showValues = savedVars.showValues
-		if savedVarCopy.showValues then
+		--savedVars.showValues = savedVars.showValues
+		if savedVars.showValues then
 			ChatOutput(GetString(SI_PET_HEALTH_VALUES_ACTIVATED))
 		else
 			ChatOutput(GetString(SI_PET_HEALTH_VALUES_DEACTIVATED))
 		end
-		for i=1,2 do
-			-- local alpha = GetAlphaFromControl(savedVars.showValues)
-			-- d(alpha)
-			window[i].values:SetAlpha(GetAlphaFromControl(savedVars.showValues))
-		end
+        PetHealth.changeValues(savedVars.showValues)
 	end, GetString(SI_PET_HEALTH_LSC_VALUES))
 	
 	LSC:Register("/pethealthlabels", function()
 		savedVars.showLabels = not savedVars.showLabels
-		savedVarCopy.showLabels = savedVars.showLabels
-		if savedVarCopy.showLabels then
+		--savedVars.showLabels = savedVars.showLabels
+		if savedVars.showLabels then
 			ChatOutput(GetString(SI_PET_HEALTH_LABELS_ACTIVATED))
 		else
 			ChatOutput(GetString(SI_PET_HEALTH_LABELS_DEACTIVATED))
-		end
-		for i=1,2 do
-			window[i].label:SetAlpha(GetAlphaFromControl(savedVars.showLabels))
-		end
+        end
+        PetHealth.changeLabels(savedVars.showLabels)
 	end, GetString(SI_PET_HEALTH_LSC_LABELS))
 	
 	LSC:Register("/pethealthbackground", function()
@@ -513,8 +544,8 @@ local function SlashCommands()
 			ChatOutput(GetString(SI_PET_HEALTH_BACKGROUND_ACTIVATED))
 		else
 			ChatOutput(GetString(SI_PET_HEALTH_BACKGROUND_DEACTIVATED))
-		end
-		background:SetAlpha(GetAlphaFromControl(savedVars.showBackground))
+        end
+        PetHealth.changeBackground(savedVars.showBackground)
 	end, GetString(SI_PET_HEALTH_LSC_BACKGROUND))
 
 end
@@ -524,17 +555,26 @@ local function OnAddOnLoaded(_, addonName)
 	EVENT_MANAGER:UnregisterForEvent(addon.name, EVENT_ADD_ON_LOADED)
 		
 	-- savedVars
-	savedVars = ZO_SavedVars:NewAccountWide(addon.name .. "_Save", addon.savedVarVersion, nil, default)
-	savedVarCopy = savedVars -- during playing, it takes only the local savedVarCopy settings instead picking the savedVars
+	savedVars = ZO_SavedVars:NewCharacterIdSettings(addon.savedVarName, addon.savedVarVersion, nil, default, GetWorldName())
+	--savedVarCopy = savedVars -- during playing, it takes only the local savedVars settings instead picking the savedVars
+    PetHealth.savedVars = savedVars
+    PetHealth.savedVarsDefault = default
 
-	-- Das Addon ist nur für Zauberer und Hüter aktiv
+	-- Addon is only enabled for the classIds which are given with the value true in the table PetHealth.supportedClasses
 	local getUnitClassId = GetUnitClassId(UNIT_PLAYER_TAG)
-	if getUnitClassId ~= 2 and getUnitClassId ~= 4 then
+	local supportedClasses = PetHealth.supportedClasses
+	local supportedClass = supportedClasses[getUnitClassId] or false
+	if not supportedClass then
 		-- debug
-		ChatOutput(GetString(SI_PET_HEALTH_CLASS))
+		ChatOutput("[PetHealth] " .. GetString(SI_PET_HEALTH_CLASS))
 		return
 	end
-	
+
+	--Build the LAM addon menu if the library LibAddonMenu-2.0 was found loaded properly
+	if PetHealth.LAM ~= nil then
+		PetHealth.buildLAMAddonMenu()
+	end
+
 	-- create ui
 	CreateControls()
 	-- do stuff
@@ -543,7 +583,7 @@ local function OnAddOnLoaded(_, addonName)
 	LoadEvents()
 	
 	-- debug
-	ChatOutput("loaded")	
+	--ChatOutput("loaded")
 end
 
 EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_ADD_ON_LOADED, OnAddOnLoaded)

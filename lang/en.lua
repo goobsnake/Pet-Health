@@ -14,6 +14,12 @@ local strings = {
 	SI_PET_HEALTH_LSC_VALUES = "Toggle pet attribute values. They have to set up in eso combat settings.",
 	SI_PET_HEALTH_LSC_LABELS = "Toggle pet name labels.",
 	SI_PET_HEALTH_LSC_BACKGROUND = "Toggle pet window background.",
+	--LAM Settings menu
+	SI_PET_HEALTH_DESC				= "Show info about your pets",
+	SI_PET_HEALTH_SAVE_TYPE			= "Save type",
+	SI_PET_HEALTH_SAVE_TYPE_TT		= "Select if you want to save the settings diferently for each of your cahracters, or if you want to use the same account wide settings for each of them.",
+	SI_PET_HEALTH_ACCOUNT_WIDE		= "Account wide",
+	SI_PET_HEALTH_EACH_CHAR	 		= "Each character",
 }
 
 for stringId, stringValue in pairs(strings) do
