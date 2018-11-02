@@ -37,6 +37,9 @@ local UNIT_PLAYER_TAG = "player"
 local LSC = LibStub("LibSlashCommander")
 PetHealth.LAM = LibStub("LibAddonMenu-2.0")
 
+local onScreenHealthAlert = 0
+local onScreenShieldAlert = 0
+
 local base, background, savedVars--, savedVarCopy
 local currentPets = {}
 local window = {}
@@ -52,6 +55,13 @@ local PET_BAR_FRAGMENT = nil
 ----------
 -- UTIL --
 ---------- 
+
+local function OnScreenMessage(message)
+	local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+	messageParams:SetCSAType(ZO_HIGH_TIER_CENTER_SCREEN_ANNOUNCE) 
+	messageParams:SetText(message)
+	CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
+end
 
 local function ChatOutput(message)
 	CHAT_SYSTEM:AddMessage(message)
@@ -134,7 +144,10 @@ end
 local function RefreshPetWindow()
 	local countPets = #currentPets
 	local combatState = GetCombatState()
-	if PET_BAR_FRAGMENT:IsHidden() and countPets == 0 and combatState then return end
+	if PET_BAR_FRAGMENT:IsHidden() and countPets == 0 and combatState then
+		OnScreenMessage(string.format("Pet has died!"))
+		return 
+	end
 	local height = 0
 	local setToHidden = true
 	if countPets > 0 then
@@ -171,6 +184,15 @@ local function OnShieldUpdate(handler, unitTag, value, maxValue, initial)
 		--ChatOutput(string.format("OnShieldUpdate() unitTag: %s - pet not active", unitTag))
 		return
 	end
+	local name = currentPets[i].unitName
+	if value < maxValue*.90 then
+		if onScreenShieldAlert == 0 then
+			OnScreenMessage(string.format("|c0000ff%s is low on shields!|r", name))
+			onScreenShieldAlert = 1
+		end
+	else
+		onScreenShieldAlert = 0
+	end
 	local ctrl = window[i].shield
 	if handler ~= nil then
 		if not ctrl:IsHidden() or value == 0 then
@@ -205,6 +227,15 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 	if i == nil then
 		--ChatOutput(string.format("OnHealthUpdate() unitTag: %s - pet not active", unitTag))
 		return
+	end
+	local name = currentPets[i].unitName
+	if powerValue < powerMax*.90 then
+		if onScreenHealthAlert == 0 then
+			OnScreenMessage(string.format("|cff0000%s is low on health!|r", name))
+			onScreenHealthAlert = 1
+		end
+	else
+		onScreenHealthAlert = 0
 	end
 	-- health values
 	window[i].values:SetText(ZO_FormatResourceBarCurrentAndMax(powerValue, powerMax))
