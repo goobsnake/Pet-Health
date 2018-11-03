@@ -254,17 +254,18 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 	--[[
 	Zeigt das Leben des Begleiters an.
 	]]
-	d(lowHealthAlertPercentage)
+	--d(lowHealthAlertPercentage)
 	local i = GetKeyWithData(unitTag)
 	if i == nil then
 		--ChatOutput(string.format("OnHealthUpdate() unitTag: %s - pet not active", unitTag))
 		return
 	elseif i == 1 then
 		local petOne = currentPets[1].unitName
-		if lowHealthAlertPercentage > 0 and value < maxValue*.01*lowHealthAlertPercentage then
-			d(petOne)
+		if lowHealthAlertPercentage > 0 and powerValue < (powerMax*.01*lowHealthAlertPercentage) then
+			--d(petOne)
 			if onScreenHealthAlertPetOne == petOne then
-				OnScreenMessage(string.format("|cff0000%s is low on health!|r", petOne))
+				--OnScreenMessage(string.format("|cff0000%s is low on health!|r", petOne))
+				OnScreenMessage(zo_strformat(GetString(), petOne))
 				onScreenHealthAlertPetOne = 1
 			end
 		else
@@ -273,7 +274,7 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 	else 
 		local petOne = currentPets[1].unitName
 		local petTwo = currentPets[2].unitName
-		if lowHealthAlertPercentage > 0 and value < maxValue*.01*lowHealthAlertPercentage then
+		if lowHealthAlertPercentage > 0 and powerValue < (powerMax*.01*lowHealthAlertPercentage) then
 			if onScreenHealthAlertPetOne == petOne then
 				OnScreenMessage(string.format("|cff0000%s is low on health!|r", petOne))
 				onScreenHealthAlertPetOne = 0
@@ -599,7 +600,6 @@ local function SlashCommands()
 	
 	LSC:Register("/pethealthcombat", function()
 		savedVars.onlyInCombat = not savedVars.onlyInCombat
-		--savedVars.onlyInCombat = savedVars.onlyInCombat
 		if savedVars.onlyInCombat then
 			ChatOutput(GetString(SI_PET_HEALTH_COMBAT_ACTIVATED))
 		else
@@ -610,7 +610,6 @@ local function SlashCommands()
 	
 	LSC:Register("/pethealthvalues", function()
 		savedVars.showValues = not savedVars.showValues
-		--savedVars.showValues = savedVars.showValues
 		if savedVars.showValues then
 			ChatOutput(GetString(SI_PET_HEALTH_VALUES_ACTIVATED))
 		else
@@ -621,7 +620,6 @@ local function SlashCommands()
 	
 	LSC:Register("/pethealthlabels", function()
 		savedVars.showLabels = not savedVars.showLabels
-		--savedVars.showLabels = savedVars.showLabels
 		if savedVars.showLabels then
 			ChatOutput(GetString(SI_PET_HEALTH_LABELS_ACTIVATED))
 		else
@@ -640,6 +638,35 @@ local function SlashCommands()
         PetHealth.changeBackground(savedVars.showBackground)
 	end, GetString(SI_PET_HEALTH_LSC_BACKGROUND))
 
+	LSC:Register("/pethealthwarnhealth", function(healthValuePercent)
+		if healthValuePercent == nil or healthValuePercent == "" then
+			ChatOutput(GetString(SI_PET_HEALTH_LAM_LOW_HEALTH_WARN) .. ": " .. tostring(savedVars.lowHealthAlertSlider))
+		else
+			local healthValuePercentNumber = tonumber(healthValuePercent)
+			if type(healthValuePercentNumber) == "number" then
+				if healthValuePercentNumber < 0 then healthValuePercentNumber = 0 end
+				if healthValuePercentNumber >= 100 then healthValuePercentNumber = 99 end
+				savedVars.lowHealthAlertSlider = healthValuePercentNumber
+				PetHealth.lowHealthAlertPercentage(healthValuePercentNumber)
+				ChatOutput(GetString(SI_PET_HEALTH_LAM_LOW_HEALTH_WARN) .. ": " .. tostring(healthValuePercentNumber))
+			end
+		end
+	end, GetString(SI_PET_HEALTH_LSC_WARN_HEALTH))
+
+	LSC:Register("/pethealthwarnshield", function(shieldValuePercent)
+		if shieldValuePercent == nil or shieldValuePercent == "" then
+			ChatOutput(GetString(SI_PET_HEALTH_LAM_LOW_SHIELD_WARN) .. ": " .. tostring(savedVars.lowShieldAlertSlider))
+		else
+			local shieldValuePercentNumber = tonumber(shieldValuePercent)
+			if type(shieldValuePercentNumber) == "number" then
+				if shieldValuePercentNumber < 0 then shieldValuePercentNumber = 0 end
+				if shieldValuePercentNumber >= 100 then shieldValuePercentNumber = 99 end
+				savedVars.lowShieldAlertSlider = shieldValuePercentNumber
+				PetHealth.lowShieldAlertPercentage(shieldValuePercentNumber)
+				ChatOutput(GetString(SI_PET_HEALTH_LAM_LOW_SHIELD_WARN) .. ": " .. tostring(shieldValuePercentNumber))
+			end
+		end
+	end, GetString(SI_PET_HEALTH_LSC_WARN_SHIELD))
 end
 
 local function OnAddOnLoaded(_, addonName)

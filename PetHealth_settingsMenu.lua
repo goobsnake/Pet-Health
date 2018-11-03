@@ -52,12 +52,12 @@ function PetHealth.buildLAMAddonMenu()
         --==============================================================================
         {
             type = 'header',
-            name = 'Visual changes',
+            name = GetString(SI_PET_HEALTH_LAM_HEADER_VISUAL),
         },
         {
             type = "checkbox",
-            name = 'Show background',
-            tooltip = 'Show the background of the PetHealth UI',
+            name = GetString(SI_PET_HEALTH_LAM_BACKGROUND),
+            tooltip = GetString(SI_PET_HEALTH_LAM_BACKGROUND_TT),
             getFunc = function() return settings.showBackground end,
             setFunc = function(value) settings.showBackground = value
                 PetHealth.changeBackground(value)
@@ -67,8 +67,8 @@ function PetHealth.buildLAMAddonMenu()
         },
         {
             type = "checkbox",
-            name = 'Show labels',
-            tooltip = 'Show the labels at the PetHealth UI',
+            name = GetString(SI_PET_HEALTH_LAM_LABELS),
+            tooltip = GetString(SI_PET_HEALTH_LAM_LABELS_TT),
             getFunc = function() return settings.showLabels end,
             setFunc = function(value) settings.showLabels = value
                 PetHealth.changeLabels(value)
@@ -78,8 +78,8 @@ function PetHealth.buildLAMAddonMenu()
         },
         {
             type = "checkbox",
-            name = 'Show values',
-            tooltip = 'Show the values at the PetHealth UI.\nThe values are shown like you have defined them in the standard ESO settings for unit frames!',
+            name = GetString(SI_PET_HEALTH_LAM_VALUES),
+            tooltip = GetString(SI_PET_HEALTH_LAM_VALUES_TT),
             getFunc = function() return settings.showValues end,
             setFunc = function(value) settings.showValues = value
                 PetHealth.changeValues(value)
@@ -89,49 +89,49 @@ function PetHealth.buildLAMAddonMenu()
         },
         {
 		    type = "slider",
-		    name = "Low Health Alert Percentage",
+		    name = GetString(SI_PET_HEALTH_LAM_LOW_HEALTH_WARN),
+            tooltip = GetString(SI_PET_HEALTH_LAM_LOW_HEALTH_WARN_TT),
 		    getFunc = function() return settings.lowHealthAlertSlider end,
 		    setFunc = function(value) settings.lowHealthAlertSlider = value 
 		    	PetHealth.lowHealthAlertPercentage(value) 
 		    end,
 		    min = 0,
-		    max = 100,
+		    max = 99,
 		    step = 1,
 		    clampInput = true, 
 		   	decimals = 0,
 		    autoSelect = false, 
 		    inputLocation = "right",
-		    tooltip = "Displays an on-screen alert depending on the pet health percentage value chosen", 
-		    width = "full", 
+		    width = "full",
 		    default = defaults.lowHealthAlertSlider,
 		},
 		{
 		    type = "slider",
-		    name = "Low Shield Alert Percentage",
+            name = GetString(SI_PET_HEALTH_LAM_LOW_SHIELD_WARN),
+            tooltip = GetString(SI_PET_HEALTH_LAM_LOW_SHIELD_WARN_TT),
 		    getFunc = function() return settings.lowShieldAlertSlider end,
 		    setFunc = function(value) settings.lowShieldAlertSlider = value 
 		    	PetHealth.lowShieldAlertPercentage(value) 
 		    end,
 		    min = 0,
-		    max = 100,
+		    max = 99,
 		    step = 1,
 		    clampInput = true, 
 		   	decimals = 0,
 		    autoSelect = false, 
 		    inputLocation = "right",
-		    tooltip = "Displays an on-screen alert depending on the pet shield percentage value chosen", 
-		    width = "full", 
+		    width = "full",
 		    default = defaults.lowShieldAlertSlider,
 		},
         --==============================================================================
         {
             type = 'header',
-            name = 'Behavior changes',
+            name = GetString(SI_PET_HEALTH_LAM_HEADER_BEHAVIOR),
         },
         {
             type = "checkbox",
-            name = 'Only in combat',
-            tooltip = 'Show the PetHealth UI onlky if you are in combat',
+            name = GetString(SI_PET_HEALTH_LAM_ONLY_IN_COMBAT),
+            tooltip = GetString(SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_TT),
             getFunc = function() return settings.onlyInCombat end,
             setFunc = function(value) settings.onlyInCombat = value
                 PetHealth.changeCombatState()

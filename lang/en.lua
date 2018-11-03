@@ -11,9 +11,14 @@ local strings = {
 	-- SLASH COMMANDS
 	SI_PET_HEALTH_LSC_DEBUG = "Toggle debug mode.",
 	SI_PET_HEALTH_LSC_COMBAT = "Toggle pet window in combat.",
-	SI_PET_HEALTH_LSC_VALUES = "Toggle pet attribute values. They have to set up in eso combat settings.",
+	SI_PET_HEALTH_LSC_VALUES = "Toggle pet attribute values. They have to be set up in eso combat settings.",
 	SI_PET_HEALTH_LSC_LABELS = "Toggle pet name labels.",
 	SI_PET_HEALTH_LSC_BACKGROUND = "Toggle pet window background.",
+	SI_PET_HEALTH_LSC_WARN_HEALTH = "Set warning threshold in % for the pet's health. Specify an unsigned integer value between 0 and 99!",
+	SI_PET_HEALTH_LSC_WARN_SHIELD = "Set warning threshold in % for the pet's shield. Specify an unsigned integer value between 0 and 99!",
+	--Low health/shield warnings
+	SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG = "\"|cff0000<<C:1>>\" is low on health!|r",
+	SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG = "\"|cff0000<<C:1>>'s\" shield is weak!|r",
 	--LAM Settings menu
 	SI_PET_HEALTH_DESC					= "Show info about your pets",
 	SI_PET_HEALTH_SAVE_TYPE				= "Save type",

@@ -13,7 +13,11 @@ SafeAddString(SI_PET_HEALTH_LSC_COMBAT , "Aktiviere/Deaktiviere das Begleiterfen
 SafeAddString(SI_PET_HEALTH_LSC_VALUES , "Aktiviere/Deaktiviere die Ressourcenanzeige der Begleiter. Diese müssen in den Einstellungen eingerichtet werden.")
 SafeAddString(SI_PET_HEALTH_LSC_LABELS , "Aktiviere/Deaktiviere die Namenanzeige der Begleiter.")
 SafeAddString(SI_PET_HEALTH_LSC_BACKGROUND , "Aktiviere/Deaktiviere den Hintergrund des Begleiterfensters.")
-
+SafeAddString(SI_PET_HEALTH_LSC_WARN_HEALTH, "Warnungs-Schwellenwert für Begleiter Leben setzen, in %. Gebe einen Ganzzahligen Wert ohne Vorzeichen zwischen 0 und 99 an!")
+SafeAddString(SI_PET_HEALTH_LSC_WARN_SHIELD, "Warnungs-Schwellenwert für Begleiter Schild setzen, in %. Gebe einen Ganzzahligen Wert ohne Vorzeichen zwischen 0 und 99 an!")
+--Low health/shield warnings
+SafeAddString(SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG, "\"|cff0000<<C:1>>\" hat wenig Leben!|r")
+SafeAddString(SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG, "\"|cff0000<<C:1>>\" Schild ist schwach!|r")
 --LAM Settings menu
 SafeAddString(SI_PET_HEALTH_DESC,				"Informationen über deine Begleiter")
 SafeAddString(SI_PET_HEALTH_SAVE_TYPE,			"Speicher Einstellungen")
