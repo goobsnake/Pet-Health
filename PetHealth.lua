@@ -27,6 +27,8 @@ local default = {
 	onlyInCombat = false,
 	showValues = true,
 	showLabels = true,
+	lowHealthAlertSlider = 0,
+	lowShieldAlertSlider = 0,
 	showBackground = true,
 	debug = false,
 }
@@ -37,13 +39,21 @@ local UNIT_PLAYER_TAG = "player"
 local LSC = LibStub("LibSlashCommander")
 PetHealth.LAM = LibStub("LibAddonMenu-2.0")
 
-local onScreenHealthAlert = 0
-local onScreenShieldAlert = 0
-
 local base, background, savedVars--, savedVarCopy
 local currentPets = {}
 local window = {}
 local inCombatAddon = false
+
+--    lowHealthAlertPercentage(savedVars.lowHealthAlertSlider)
+--    lowShieldAlertPercentage(savedVars.lowShieldAlertSlider)
+
+local onScreenHealthAlert = 0
+local onScreenHealthAlertPetOne = 0
+local onScreenHealthAlertPetTwo = 0
+local onScreenShieldAlertPetOne = 0
+local onScreenShieldAlertPetTwo = 0
+local lowHealthAlertPercentage = 0
+local lowShieldAlertPercentage = 0
 
 local WINDOW_MANAGER = GetWindowManager()
 local WINDOW_WIDTH = 250
@@ -58,7 +68,7 @@ local PET_BAR_FRAGMENT = nil
 
 local function OnScreenMessage(message)
 	local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
-	messageParams:SetCSAType(ZO_HIGH_TIER_CENTER_SCREEN_ANNOUNCE) 
+	messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN) 
 	messageParams:SetText(message)
 	CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
 end
@@ -183,15 +193,36 @@ local function OnShieldUpdate(handler, unitTag, value, maxValue, initial)
 	if i == nil then
 		--ChatOutput(string.format("OnShieldUpdate() unitTag: %s - pet not active", unitTag))
 		return
-	end
-	local name = currentPets[i].unitName
-	if value < maxValue*.90 then
-		if onScreenShieldAlert == 0 then
-			OnScreenMessage(string.format("|c0000ff%s is low on shields!|r", name))
-			onScreenShieldAlert = 1
+	elseif i == 1 then
+		local petOne = currentPets[1].unitName
+		if lowShieldAlertPercentage > 0 and value < maxValue*.01*lowShieldAlertPercentage then
+			d(petOne)
+			if onScreenShieldAlertPetOne == petOne then
+				OnScreenMessage(string.format("|c000099%s\'s shield is getting low!|r", petOne))
+				onScreenShieldAlertPetOne = 1
+			end
+		else
+			onScreenShieldAlertPetOne = petOne
 		end
-	else
-		onScreenShieldAlert = 0
+	else 
+		local petOne = currentPets[1].unitName
+		local petTwo = currentPets[2].unitName
+		if lowShieldAlertPercentage > 0 and value < maxValue*.01*lowShieldAlertPercentage then
+			if onScreenShieldAlertPetOne == petOne then
+				OnScreenMessage(string.format("|c000099%s\'s shield is getting low!|r", petOne))
+				onScreenShieldAlertPetOne = 0
+			elseif onScreenShieldAlertPetTwo == petTwo then
+				OnScreenMessage(string.format("|c000099%s\'s shield is getting low!|r", petTwo))
+				onScreenShieldAlertPetTwo = 0
+			end
+		else
+			local name = currentPets[i].unitName
+			if name == petOne then
+				onScreenShieldAlertPetOne = petOne
+			else
+				onScreenShieldAlertPetTwo = petTwo
+			end
+		end
 	end
 	local ctrl = window[i].shield
 	if handler ~= nil then
@@ -223,19 +254,41 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 	--[[
 	Zeigt das Leben des Begleiters an.
 	]]
+	d(lowHealthAlertPercentage)
 	local i = GetKeyWithData(unitTag)
 	if i == nil then
 		--ChatOutput(string.format("OnHealthUpdate() unitTag: %s - pet not active", unitTag))
 		return
-	end
-	local name = currentPets[i].unitName
-	if powerValue < powerMax*.90 then
-		if onScreenHealthAlert == 0 then
-			OnScreenMessage(string.format("|cff0000%s is low on health!|r", name))
-			onScreenHealthAlert = 1
+	elseif i == 1 then
+		local petOne = currentPets[1].unitName
+		if lowHealthAlertPercentage > 0 and value < maxValue*.01*lowHealthAlertPercentage then
+			d(petOne)
+			if onScreenHealthAlertPetOne == petOne then
+				OnScreenMessage(string.format("|cff0000%s is low on health!|r", petOne))
+				onScreenHealthAlertPetOne = 1
+			end
+		else
+			onScreenHealthAlertPetOne = petOne
 		end
-	else
-		onScreenHealthAlert = 0
+	else 
+		local petOne = currentPets[1].unitName
+		local petTwo = currentPets[2].unitName
+		if lowHealthAlertPercentage > 0 and value < maxValue*.01*lowHealthAlertPercentage then
+			if onScreenHealthAlertPetOne == petOne then
+				OnScreenMessage(string.format("|cff0000%s is low on health!|r", petOne))
+				onScreenHealthAlertPetOne = 0
+			elseif onScreenHealthAlertPetTwo == petTwo then
+				OnScreenMessage(string.format("|cff0000%s is low on health!|r", petTwo))
+				onScreenHealthAlertPetTwo = 0
+			end
+		else
+			local name = currentPets[i].unitName
+			if name == petOne then
+				onScreenHealthAlertPetOne = petOne
+			else
+				onScreenHealthAlertPetTwo = petTwo
+			end
+		end
 	end
 	-- health values
 	window[i].values:SetText(ZO_FormatResourceBarCurrentAndMax(powerValue, powerMax))
@@ -524,6 +577,14 @@ function PetHealth.changeLabels(toValue)
     end
 end
 
+function PetHealth.lowHealthAlertPercentage(toValue)
+	lowHealthAlertPercentage = toValue
+end
+
+function PetHealth.lowShieldAlertPercentage(toValue)
+	lowShieldAlertPercentage = toValue
+end
+
 local function SlashCommands()
 
 	-- LSC:Register("/pethealthdebug", function()
@@ -590,6 +651,8 @@ local function OnAddOnLoaded(_, addonName)
 	--savedVarCopy = savedVars -- during playing, it takes only the local savedVars settings instead picking the savedVars
     PetHealth.savedVars = savedVars
     PetHealth.savedVarsDefault = default
+    lowHealthAlertPercentage = savedVars.lowHealthAlertSlider
+	lowShieldAlertPercentage = savedVars.lowShieldAlertSlider
 
 	-- Addon is only enabled for the classIds which are given with the value true in the table PetHealth.supportedClasses
 	local getUnitClassId = GetUnitClassId(UNIT_PLAYER_TAG)

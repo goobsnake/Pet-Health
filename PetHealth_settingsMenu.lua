@@ -87,6 +87,42 @@ function PetHealth.buildLAMAddonMenu()
             default = defaults.showValues,
             width="full",
         },
+        {
+		    type = "slider",
+		    name = "Low Health Alert Percentage",
+		    getFunc = function() return settings.lowHealthAlertSlider end,
+		    setFunc = function(value) settings.lowHealthAlertSlider = value 
+		    	PetHealth.lowHealthAlertPercentage(value) 
+		    end,
+		    min = 0,
+		    max = 100,
+		    step = 1,
+		    clampInput = true, 
+		   	decimals = 0,
+		    autoSelect = false, 
+		    inputLocation = "right",
+		    tooltip = "Displays an on-screen alert depending on the pet health percentage value chosen", 
+		    width = "full", 
+		    default = defaults.lowHealthAlertSlider,
+		},
+		{
+		    type = "slider",
+		    name = "Low Shield Alert Percentage",
+		    getFunc = function() return settings.lowShieldAlertSlider end,
+		    setFunc = function(value) settings.lowShieldAlertSlider = value 
+		    	PetHealth.lowShieldAlertPercentage(value) 
+		    end,
+		    min = 0,
+		    max = 100,
+		    step = 1,
+		    clampInput = true, 
+		   	decimals = 0,
+		    autoSelect = false, 
+		    inputLocation = "right",
+		    tooltip = "Displays an on-screen alert depending on the pet shield percentage value chosen", 
+		    width = "full", 
+		    default = defaults.lowShieldAlertSlider,
+		},
         --==============================================================================
         {
             type = 'header',
