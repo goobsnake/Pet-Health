@@ -36,9 +36,6 @@ local default = {
 local UNIT_PLAYER_PET = "playerpet"
 local UNIT_PLAYER_TAG = "player"
 
-local LSC = LibStub("LibSlashCommander")
-PetHealth.LAM = LibStub("LibAddonMenu-2.0")
-
 local base, background, savedVars--, savedVarCopy
 local currentPets = {}
 local window = {}
@@ -61,6 +58,8 @@ local WINDOW_HEIGHT_ONE = 76
 local WINDOW_HEIGHT_TWO = 116
 local PET_BAR_FRAGMENT = nil
 
+local AddOnManager = GetAddOnManager()
+local LSC
 
 ----------
 -- UTIL --
@@ -75,6 +74,15 @@ end
 
 local function ChatOutput(message)
 	CHAT_SYSTEM:AddMessage(message)
+end
+
+local function CheckAddon(addon)
+	for i = 1, AddOnManager:GetNumAddOns() do
+        local name, title, author, description, enabled, state, isOutOfDate = AddOnManager:GetAddOnInfo(i)          
+        if title == addon and enabled == true then
+			return true
+        end
+    end
 end
 
 local function GetPetNameLower(abilityId)
@@ -196,7 +204,6 @@ local function OnShieldUpdate(handler, unitTag, value, maxValue, initial)
 	elseif i == 1 then
 		local petOne = currentPets[1].unitName
 		if lowShieldAlertPercentage > 0 and value < maxValue*.01*lowShieldAlertPercentage then
-			d(petOne)
 			if onScreenShieldAlertPetOne == petOne then
 				OnScreenMessage(string.format("|c000099%s\'s shield is getting low!|r", petOne))
 				onScreenShieldAlertPetOne = 1
@@ -219,7 +226,7 @@ local function OnShieldUpdate(handler, unitTag, value, maxValue, initial)
 			local name = currentPets[i].unitName
 			if name == petOne then
 				onScreenShieldAlertPetOne = petOne
-			else
+			elseif name == petTwo then
 				onScreenShieldAlertPetTwo = petTwo
 			end
 		end
@@ -254,7 +261,6 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 	--[[
 	Zeigt das Leben des Begleiters an.
 	]]
-	--d(lowHealthAlertPercentage)
 	local i = GetKeyWithData(unitTag)
 	if i == nil then
 		--ChatOutput(string.format("OnHealthUpdate() unitTag: %s - pet not active", unitTag))
@@ -262,7 +268,6 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 	elseif i == 1 then
 		local petOne = currentPets[1].unitName
 		if lowHealthAlertPercentage > 0 and powerValue < (powerMax*.01*lowHealthAlertPercentage) then
-			--d(petOne)
 			if onScreenHealthAlertPetOne == petOne then
 				--OnScreenMessage(string.format("|cff0000%s is low on health!|r", petOne))
 				OnScreenMessage(zo_strformat(GetString(), petOne))
@@ -286,7 +291,7 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 			local name = currentPets[i].unitName
 			if name == petOne then
 				onScreenHealthAlertPetOne = petOne
-			else
+			elseif name == petTwo then
 				onScreenHealthAlertPetTwo = petTwo
 			end
 		end
@@ -690,17 +695,33 @@ local function OnAddOnLoaded(_, addonName)
 		ChatOutput("[PetHealth] " .. GetString(SI_PET_HEALTH_CLASS))
 		return
 	end
-
-	--Build the LAM addon menu if the library LibAddonMenu-2.0 was found loaded properly
-	if PetHealth.LAM ~= nil then
-		PetHealth.buildLAMAddonMenu()
+	
+	--Makes libs completely optional
+	--If users want to change default values or expanded funcitonality, they will need to install applicable libs
+	local isStubActive = CheckAddon('LibStub')
+	if isStubActive then
+		local isLAMActive = CheckAddon('LibAddonMenu-2.0')
+		local isLSCActive = CheckAddon('LibSlashCommander')
+		if isLAMActive then
+		--Build the LAM addon menu if the library LibAddonMenu-2.0 was found loaded properly
+			PetHealth.LAM = LibStub("LibAddonMenu-2.0")
+			PetHealth.buildLAMAddonMenu()
+		end
+		if isLSCActive then
+		--Build the slash commands if the library LibSlashCommander was found loaded properly
+			LSC = LibStub("LibSlashCommander")
+			SlashCommands()
+		end
 	end
 
+	-- local LAM = LibStub("LibAddonMenu-2.0")
+	-- if LAM ~= nil then
+		
+	-- end
 	-- create ui
 	CreateControls()
 	-- do stuff
 	--GetActivePets()
-	SlashCommands()
 	LoadEvents()
 	
 	-- debug
