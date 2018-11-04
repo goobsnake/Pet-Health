@@ -1,5 +1,5 @@
---Elder Scrolls: Online addon (written in LUA) which adds persistent in-game health bars to all permanent pets.
---Original/base work of this addon was developed by SCOOTWORKS and I was granted permission by him to take over full development and distribution of this addon.
+--Initial LAM Settings support and code cleanup by Baertram
+
 PetHealth = PetHealth or {}
 
 function PetHealth.buildLAMAddonMenu()
@@ -22,7 +22,7 @@ function PetHealth.buildLAMAddonMenu()
 
     local savedVariablesOptions = {
         [1] = GetString(SI_PET_HEALTH_EACH_CHAR),
-        --[2] = GetString(SI_PET_HEALTH_ACCOUNT_WIDE),
+        [2] = GetString(SI_PET_HEALTH_ACCOUNT_WIDE),
     }
     --Register the LAM panel and add it to the global PetHealth table
     PetHealth.LAM_SettingsPanel = PetHealth.LAM:RegisterAddonPanel(addonVars.name .. "_LAM", panelData)
