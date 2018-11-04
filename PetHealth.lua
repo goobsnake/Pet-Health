@@ -44,7 +44,6 @@ local inCombatAddon = false
 --    lowHealthAlertPercentage(savedVars.lowHealthAlertSlider)
 --    lowShieldAlertPercentage(savedVars.lowShieldAlertSlider)
 
-local onScreenHealthAlert = 0
 local onScreenHealthAlertPetOne = 0
 local onScreenHealthAlertPetTwo = 0
 local onScreenShieldAlertPetOne = 0
@@ -204,30 +203,30 @@ local function OnShieldUpdate(handler, unitTag, value, maxValue, initial)
 	elseif i == 1 then
 		local petOne = currentPets[1].unitName
 		if lowShieldAlertPercentage > 0 and value < maxValue*.01*lowShieldAlertPercentage then
-			if onScreenShieldAlertPetOne == petOne then
+			if onScreenShieldAlertPetOne == 0 then
 				OnScreenMessage(string.format("|c000099%s\'s shield is getting low!|r", petOne))
 				onScreenShieldAlertPetOne = 1
 			end
 		else
-			onScreenShieldAlertPetOne = petOne
+			onScreenShieldAlertPetOne = 0
 		end
 	else 
+		local name = currentPets[i].unitName
 		local petOne = currentPets[1].unitName
 		local petTwo = currentPets[2].unitName
 		if lowShieldAlertPercentage > 0 and value < maxValue*.01*lowShieldAlertPercentage then
-			if onScreenShieldAlertPetOne == petOne then
+			if name == petOne and onScreenShieldAlertPetOne == 0 then
 				OnScreenMessage(string.format("|c000099%s\'s shield is getting low!|r", petOne))
-				onScreenShieldAlertPetOne = 0
-			elseif onScreenShieldAlertPetTwo == petTwo then
+				onScreenShieldAlertPetOne = 1
+			elseif name == petTwo and onScreenShieldAlertPetTwo == 0 then
 				OnScreenMessage(string.format("|c000099%s\'s shield is getting low!|r", petTwo))
-				onScreenShieldAlertPetTwo = 0
+				onScreenShieldAlertPetTwo = 1
 			end
 		else
-			local name = currentPets[i].unitName
 			if name == petOne then
-				onScreenShieldAlertPetOne = petOne
+				onScreenShieldAlertPetOne = 0
 			elseif name == petTwo then
-				onScreenShieldAlertPetTwo = petTwo
+				onScreenShieldAlertPetTwo = 0
 			end
 		end
 	end
@@ -241,7 +240,9 @@ local function OnShieldUpdate(handler, unitTag, value, maxValue, initial)
 			ctrl:SetHidden(false)
 		end
 	end
-	ZO_StatusBar_SmoothTransition(window[i].shield, value, maxValue, (initial == "true" and true or false))
+	if maxValue > 0 then
+		ZO_StatusBar_SmoothTransition(window[i].shield, value, maxValue, (initial == "true" and true or false))
+	end
 end
 
 local function GetShield(unitTag)
@@ -268,31 +269,31 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 	elseif i == 1 then
 		local petOne = currentPets[1].unitName
 		if lowHealthAlertPercentage > 0 and powerValue < (powerMax*.01*lowHealthAlertPercentage) then
-			if onScreenHealthAlertPetOne == petOne then
-				--OnScreenMessage(string.format("|cff0000%s is low on health!|r", petOne))
-				OnScreenMessage(zo_strformat(GetString(), petOne))
+			if onScreenHealthAlertPetOne == 0 then
+				OnScreenMessage(string.format("|cff0000%s is low on health!|r", petOne))
+				--OnScreenMessage(zo_strformat(GetString(), petOne))
 				onScreenHealthAlertPetOne = 1
 			end
 		else
-			onScreenHealthAlertPetOne = petOne
+			onScreenHealthAlertPetOne = 0
 		end
 	else 
+		local name = currentPets[i].unitName
 		local petOne = currentPets[1].unitName
 		local petTwo = currentPets[2].unitName
 		if lowHealthAlertPercentage > 0 and powerValue < (powerMax*.01*lowHealthAlertPercentage) then
-			if onScreenHealthAlertPetOne == petOne then
+			if name == petOne and onScreenHealthAlertPetOne == 0 then
 				OnScreenMessage(string.format("|cff0000%s is low on health!|r", petOne))
-				onScreenHealthAlertPetOne = 0
-			elseif onScreenHealthAlertPetTwo == petTwo then
+				onScreenHealthAlertPetOne = 1
+			elseif name == petTwo and onScreenHealthAlertPetTwo == 0 then
 				OnScreenMessage(string.format("|cff0000%s is low on health!|r", petTwo))
-				onScreenHealthAlertPetTwo = 0
+				onScreenHealthAlertPetTwo = 1
 			end
 		else
-			local name = currentPets[i].unitName
 			if name == petOne then
-				onScreenHealthAlertPetOne = petOne
+				onScreenHealthAlertPetOne = 0
 			elseif name == petTwo then
-				onScreenHealthAlertPetTwo = petTwo
+				onScreenHealthAlertPetTwo = 0
 			end
 		end
 	end

@@ -22,7 +22,7 @@ function PetHealth.buildLAMAddonMenu()
 
     local savedVariablesOptions = {
         [1] = GetString(SI_PET_HEALTH_EACH_CHAR),
-        [2] = GetString(SI_PET_HEALTH_ACCOUNT_WIDE),
+      -- [2] = GetString(SI_PET_HEALTH_ACCOUNT_WIDE),
     }
     --Register the LAM panel and add it to the global PetHealth table
     PetHealth.LAM_SettingsPanel = PetHealth.LAM:RegisterAddonPanel(addonVars.name .. "_LAM", panelData)

@@ -2,6 +2,7 @@
 ## Description: Allows for in-game Pet Health bars!
 ## APIVersion: 100025 100026
 ## Author: Scootworks & Goobsnake
+## Contributors: Baertram
 ## AddOnVersion: 1.02
 ## Version: 1.02
 ## SavedVariables: PetHealth_Save
