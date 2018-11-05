@@ -495,10 +495,8 @@ local function LoadEvents()
 	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_POWER_UPDATE, OnHealthUpdate)
 	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_UNIT_CREATED, function(_, unitTag)
 		if IsUnitValidPet(unitTag) then
-			table.insert(currentPets, { unitTag = unitTag, unitName = GetUnitName(unitTag) })
-			UpdatePetStats(unitTag)
+			GetActivePets()
 		end
-		RefreshPetWindow()
 	end)
 	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_UNIT_DESTROYED, function(_, unitTag)
 		local key = GetKeyWithData(unitTag)
