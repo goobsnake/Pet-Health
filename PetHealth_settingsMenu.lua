@@ -88,6 +88,17 @@ function PetHealth.buildLAMAddonMenu()
             width="full",
         },
         {
+            type = "checkbox",
+            name = GetString(SI_PET_HEALTH_LAM_UNSUMMONED_ALERT),
+            tooltip = GetString(SI_PET_HEALTH_LAM_UNSUMMONED_ALERT_TT),
+            getFunc = function() return settings.unsummonedAlerts end,
+            setFunc = function(value) settings.unsummonedAlerts = value
+                PetHealth.unsummonedAlerts(value)
+            end,
+            default = defaults.unsummonedAlerts,
+            width="full",
+        },
+        {
 		    type = "slider",
 		    name = GetString(SI_PET_HEALTH_LAM_LOW_HEALTH_WARN),
             tooltip = GetString(SI_PET_HEALTH_LAM_LOW_HEALTH_WARN_TT),
@@ -138,6 +149,24 @@ function PetHealth.buildLAMAddonMenu()
             end,
             default = defaults.onlyInCombat,
             width="full",
+        },
+        {
+            type = "slider",
+            name = GetString(SI_PET_HEALTH_LAM_LOW_HEALTH_WARN),
+            tooltip = GetString(SI_PET_HEALTH_LAM_LOW_HEALTH_WARN_TT),
+            getFunc = function() return settings.hideFrameUntilHealthSlider end,
+            setFunc = function(value) settings.hideFrameUntilHealthSlider = value 
+                PetHealth.hideFrameUntilHealthPercentage(value) 
+            end,
+            min = 0,
+            max = 99,
+            step = 1,
+            clampInput = true, 
+            decimals = 0,
+            autoSelect = false, 
+            inputLocation = "right",
+            width = "full",
+            default = defaults.hideFrameUntilHealthSlider,
         },
     } -- optionsTable
     -- END OF OPTIONS TABLE

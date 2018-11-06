@@ -17,8 +17,11 @@ local strings = {
 	SI_PET_HEALTH_LSC_WARN_HEALTH = "Set warning threshold in % for the pet's health. Specify an unsigned integer value between 0 and 99!",
 	SI_PET_HEALTH_LSC_WARN_SHIELD = "Set warning threshold in % for the pet's shield. Specify an unsigned integer value between 0 and 99!",
 	--Low health/shield warnings
-	SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG = "\"|cff0000<<C:1>>\" is low on health!|r",
-	SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG = "\"|cff0000<<C:1>>'s\" shield is weak!|r",
+	SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG = "is low on health!",
+	SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG = "shield is weak!",
+	--Unsummoned messages
+	SI_PET_HEALTH_UNSUMMONED_SWIMMING_MSG = "Pet(s) unsummoned while swimming!",
+	SI_PET_HEALTH_UNSUMMONED_MSG = "Pet(s) killed!",
 	--LAM Settings menu
 	SI_PET_HEALTH_DESC					= "Show info about your pets",
 	SI_PET_HEALTH_SAVE_TYPE				= "Save type",
@@ -32,6 +35,8 @@ local strings = {
 	SI_PET_HEALTH_LAM_LABELS_TT			= 'Show the labels at the PetHealth UI',
 	SI_PET_HEALTH_LAM_VALUES			= 'Show values',
 	SI_PET_HEALTH_LAM_VALUES_TT			= 'Show the values at the PetHealth UI.\nThe values are shown like you have defined them in the standard ESO settings for unit frames!',
+	SI_PET_HEALTH_LAM_UNSUMMONED_ALERT	= 'Unsummoned Alerts',
+	SI_PET_HEALTH_LAM_UNSUMMONED_ALERT_TT = 'Shows on-screen alerts when a pet is unsummoned',
 	SI_PET_HEALTH_LAM_LOW_HEALTH_WARN	= "Low Health Alert Percentage",
 	SI_PET_HEALTH_LAM_LOW_HEALTH_WARN_TT= "Displays an on-screen alert depending on the pet health percentage value chosen",
 	SI_PET_HEALTH_LAM_LOW_SHIELD_WARN	= "Low Shield Alert Percentage",

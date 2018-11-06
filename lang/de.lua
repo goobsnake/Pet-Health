@@ -16,8 +16,11 @@ SafeAddString(SI_PET_HEALTH_LSC_BACKGROUND , "Aktiviere/Deaktiviere den Hintergr
 SafeAddString(SI_PET_HEALTH_LSC_WARN_HEALTH, "Warnungs-Schwellenwert für Begleiter Leben setzen, in %. Gebe einen Ganzzahligen Wert ohne Vorzeichen zwischen 0 und 99 an!")
 SafeAddString(SI_PET_HEALTH_LSC_WARN_SHIELD, "Warnungs-Schwellenwert für Begleiter Schild setzen, in %. Gebe einen Ganzzahligen Wert ohne Vorzeichen zwischen 0 und 99 an!")
 --Low health/shield warnings
-SafeAddString(SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG, "\"|cff0000<<C:1>>\" hat wenig Leben!|r")
-SafeAddString(SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG, "\"|cff0000<<C:1>>\" Schild ist schwach!|r")
+SafeAddString(SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG, "hat wenig Leben!")
+SafeAddString(SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG, "Schild ist schwach!")
+	--Unsummoned messages
+SafeAddString(SI_PET_HEALTH_UNSUMMONED_SWIMMING_MSG, "Haustier (e) beim Schwimmen nicht gesummt!")
+SafeAddString(SI_PET_HEALTH_UNSUMMONED_MSG, "Pet (s) getötet!")
 --LAM Settings menu
 SafeAddString(SI_PET_HEALTH_DESC,				"Informationen über deine Begleiter")
 SafeAddString(SI_PET_HEALTH_SAVE_TYPE,			"Speicher Einstellungen")
@@ -32,6 +35,8 @@ SafeAddString(SI_PET_HEALTH_LAM_LABELS,                     "Zeige Bezeichnungen
 SafeAddString(SI_PET_HEALTH_LAM_LABELS_TT,                  "Zeige die Bezeichnungen auf der PetHealth Oberfläche an")
 SafeAddString(SI_PET_HEALTH_LAM_VALUES,                     "Zeige Werte")
 SafeAddString(SI_PET_HEALTH_LAM_VALUES_TT,                  "Zeige die Werte auf der PetHealth Oberfläche an.\nDie Werte werden so formatiert, wie du die Einstellungen im Spiel für die Werte-Darstellung auf Spieler/Gegner Rahmen gewählt hast!")
+SafeAddString(SI_PET_HEALTH_LAM_UNSUMMONED_ALERT,		'Ungelesene Alarme')
+SafeAddString(SI_PET_HEALTH_LAM_UNSUMMONED_ALERT_TT, 	'Zeigt auf dem Bildschirm Warnmeldungen an, wenn ein Haustier nicht gesichtet wird')  
 SafeAddString(SI_PET_HEALTH_LAM_LOW_HEALTH_WARN,            "'Geringes Leben' Warnung, %")
 SafeAddString(SI_PET_HEALTH_LAM_LOW_HEALTH_WARN_TT,         "Zeigt eine Bildschirm Benachrichtigung an, wenn das Leben deiner Pets kleiner/gleich diesen Wert in % erreicht")
 SafeAddString(SI_PET_HEALTH_LAM_LOW_SHIELD_WARN,            "'Geringes Schild' Warnung, %")
