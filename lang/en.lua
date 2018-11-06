@@ -7,6 +7,8 @@ local strings = {
 	SI_PET_HEALTH_LABELS_DEACTIVATED = "Pet health labels are disabled.",
 	SI_PET_HEALTH_BACKGROUND_ACTIVATED = "Pet health frame background is enabled.",
 	SI_PET_HEALTH_BACKGROUND_DEACTIVATED = "Pet health frame background is disabled.",
+	SI_PET_HEALTH_UNSUMMONEDALERTS_ACTIVATED = "Pet health unsummoned alerts are enabled.",
+	SI_PET_HEALTH_UNSUMMONEDALERTS_DEACTIVATED = "Pet health unsummoned alerts are disabled.",
 	SI_PET_HEALTH_CLASS = "Your class is not supported with this addon.",
 	-- SLASH COMMANDS
 	SI_PET_HEALTH_LSC_DEBUG = "Toggle debug mode.",
@@ -14,14 +16,15 @@ local strings = {
 	SI_PET_HEALTH_LSC_VALUES = "Toggle pet attribute values. Needs to also be enabled in the ESO combat settings.",
 	SI_PET_HEALTH_LSC_LABELS = "Toggle pet name labels.",
 	SI_PET_HEALTH_LSC_BACKGROUND = "Toggle pet window background.",
+	SI_PET_HEALTH_LSC_UNSUMMONEDALERTS = "Toggle on-screen alerts when a pet is unsummoned or killed.",
 	SI_PET_HEALTH_LSC_WARN_HEALTH = "Set warning threshold in % for the pet's health. Specify an unsigned integer value between 0 and 99!",
 	SI_PET_HEALTH_LSC_WARN_SHIELD = "Set warning threshold in % for the pet's shield. Specify an unsigned integer value between 0 and 99!",
 	--Low health/shield warnings
 	SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG = "is low on health!",
 	SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG = "shield is weak!",
 	--Unsummoned messages
-	SI_PET_HEALTH_UNSUMMONED_SWIMMING_MSG = "Pet(s) unsummoned while swimming!",
-	SI_PET_HEALTH_UNSUMMONED_MSG = "Pet(s) killed!",
+	SI_PET_HEALTH_UNSUMMONED_SWIMMING_MSG = "All pets unsummoned while swimming!",
+	SI_PET_HEALTH_UNSUMMONED_MSG = "has been killed!",
 	--LAM Settings menu
 	SI_PET_HEALTH_DESC					= "Show info about your pets",
 	SI_PET_HEALTH_SAVE_TYPE				= "Save type",

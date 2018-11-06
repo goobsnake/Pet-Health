@@ -91,11 +91,11 @@ function PetHealth.buildLAMAddonMenu()
             type = "checkbox",
             name = GetString(SI_PET_HEALTH_LAM_UNSUMMONED_ALERT),
             tooltip = GetString(SI_PET_HEALTH_LAM_UNSUMMONED_ALERT_TT),
-            getFunc = function() return settings.unsummonedAlerts end,
-            setFunc = function(value) settings.unsummonedAlerts = value
+            getFunc = function() return settings.petUnsummonedAlerts end,
+            setFunc = function(value) settings.petUnsummonedAlerts = value
                 PetHealth.unsummonedAlerts(value)
             end,
-            default = defaults.unsummonedAlerts,
+            default = defaults.petUnsummonedAlerts,
             width="full",
         },
         {

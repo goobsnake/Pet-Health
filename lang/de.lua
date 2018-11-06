@@ -6,6 +6,8 @@ SafeAddString(SI_PET_HEALTH_LABELS_ACTIVATED , "Werte sind aktiviert.")
 SafeAddString(SI_PET_HEALTH_LABELS_DEACTIVATED , "Werte sind deaktiviert.")
 SafeAddString(SI_PET_HEALTH_BACKGROUND_ACTIVATED , "Hintergrund ist aktiviert.")
 SafeAddString(SI_PET_HEALTH_BACKGROUND_DEACTIVATED , "Hintergrund ist deaktiviert.")
+SafeAddString(SI_PET_HEALTH_UNSUMMONEDALERTS_ACTIVATED , "Warnungen für nicht gesonderte Tiergesundheit sind aktiviert.")
+SafeAddString(SI_PET_HEALTH_UNSUMMONEDALERTS_DEACTIVATED , "Ungesonderte Warnungen für Tiergesundheit sind deaktiviert.")
 SafeAddString(SI_PET_HEALTH_CLASS , "Deine Klasse wird nicht unterstützt.")
 -- SLASH COMMANDS
 SafeAddString(SI_PET_HEALTH_LSC_DEBUG , "Zwischen Debug Modus umschalten.")
@@ -13,14 +15,15 @@ SafeAddString(SI_PET_HEALTH_LSC_COMBAT , "Aktiviere/Deaktiviere das Begleiterfen
 SafeAddString(SI_PET_HEALTH_LSC_VALUES , "Aktiviere/Deaktiviere die Ressourcenanzeige der Begleiter. Diese müssen in den Einstellungen eingerichtet werden.")
 SafeAddString(SI_PET_HEALTH_LSC_LABELS , "Aktiviere/Deaktiviere die Namenanzeige der Begleiter.")
 SafeAddString(SI_PET_HEALTH_LSC_BACKGROUND , "Aktiviere/Deaktiviere den Hintergrund des Begleiterfensters.")
+SafeAddString(SI_PET_HEALTH_LSC_UNSUMMONEDALERTS , "Schalten Sie die Warnmeldungen auf dem Bildschirm um, wenn ein Haustier nicht gesichtet oder getötet wird.")
 SafeAddString(SI_PET_HEALTH_LSC_WARN_HEALTH, "Warnungs-Schwellenwert für Begleiter Leben setzen, in %. Gebe einen Ganzzahligen Wert ohne Vorzeichen zwischen 0 und 99 an!")
 SafeAddString(SI_PET_HEALTH_LSC_WARN_SHIELD, "Warnungs-Schwellenwert für Begleiter Schild setzen, in %. Gebe einen Ganzzahligen Wert ohne Vorzeichen zwischen 0 und 99 an!")
 --Low health/shield warnings
 SafeAddString(SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG, "hat wenig Leben!")
 SafeAddString(SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG, "Schild ist schwach!")
 	--Unsummoned messages
-SafeAddString(SI_PET_HEALTH_UNSUMMONED_SWIMMING_MSG, "Haustier (e) beim Schwimmen nicht gesummt!")
-SafeAddString(SI_PET_HEALTH_UNSUMMONED_MSG, "Pet (s) getötet!")
+SafeAddString(SI_PET_HEALTH_UNSUMMONED_SWIMMING_MSG, "Alle Haustiere sind beim Schwimmen nicht zu hören!")
+SafeAddString(SI_PET_HEALTH_UNSUMMONED_MSG, "wurde getötet!")
 --LAM Settings menu
 SafeAddString(SI_PET_HEALTH_DESC,				"Informationen über deine Begleiter")
 SafeAddString(SI_PET_HEALTH_SAVE_TYPE,			"Speicher Einstellungen")

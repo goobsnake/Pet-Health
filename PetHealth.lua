@@ -29,7 +29,7 @@ local default = {
 	showLabels = true,
 	lowHealthAlertSlider = 0,
 	lowShieldAlertSlider = 0,
-	unsummonedAlerts = false,
+	petUnsummonedAlerts = false,
 	hideFrameUntilHealthSlider = 0,
 	showBackground = true,
 	debug = false,
@@ -158,14 +158,19 @@ local function SetPetWindowHidden(hidden, combatState)
 	--ChatOutput(string.format("SetPetWindowHidden() setToHidden: %s, onlyInCombat: %s", tostring(setToHidden), tostring(onlyInCombat)))
 end
 
-local function UnSummonedAlerts()
+local function PetUnSummonedAlerts(unitTag)
 	if unsummonedAlerts then
+		local i = GetKeyWithData(unitTag)
+		if i == nil then
+			return
+		end
+		local petName = currentPets[i].unitName
 		local swimming = IsUnitSwimming("player")
 		local inCombat = IsUnitInCombat("player")
 		if swimming then
-			OnScreenMessage(string.format(SI_PET_HEALTH_UNSUMMONED_SWIMMING_MSG))
+			OnScreenMessage(string.format(GetString(SI_PET_HEALTH_UNSUMMONED_SWIMMING_MSG)))
 		elseif inCombat then
-			OnScreenMessage(string.format(SI_PET_HEALTH_UNSUMMONED_MSG))
+			OnScreenMessage(zo_strformat("<<1>> <<2>>", petName, GetString(SI_PET_HEALTH_UNSUMMONED_MSG)))
 		end
 	end
 end
@@ -173,13 +178,8 @@ end
 local function RefreshPetWindow()
 	local countPets = #currentPets
 	local combatState = GetCombatState()
-	if PET_BAR_FRAGMENT:IsHidden() and countPets == 0 then
-		if combatState then
-			UnSummonedAlerts()
+	if PET_BAR_FRAGMENT:IsHidden() and countPets == 0 and combatState then
 		return 
-		else
-			UnSummonedAlerts() 
-		end
 	end
 	local height = 0
 	local setToHidden = true
@@ -220,7 +220,7 @@ local function OnShieldUpdate(handler, unitTag, value, maxValue, initial)
 		local petOne = currentPets[1].unitName
 		if lowShieldAlertPercentage > 0 and value < maxValue*.01*lowShieldAlertPercentage then
 			if onScreenShieldAlertPetOne == 0 then
-				OnScreenMessage(string.format("|c000099%s\'s %s|r", petOne, SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG))
+				OnScreenMessage(zo_strformat("|c000099<<1>>\'s <<2>>|r", petOne, GetString(SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG)))
 				onScreenShieldAlertPetOne = 1
 			end
 		else
@@ -232,10 +232,10 @@ local function OnShieldUpdate(handler, unitTag, value, maxValue, initial)
 		local petTwo = currentPets[2].unitName
 		if lowShieldAlertPercentage > 0 and value < maxValue*.01*lowShieldAlertPercentage then
 			if name == petOne and onScreenShieldAlertPetOne == 0 then
-				OnScreenMessage(string.format("|c000099%s\'s %s|r", petOne, SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG))
+				OnScreenMessage(zo_strformat("|c000099<<1>>\'s <<2>>|r", petOne, GetString(SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG)))
 				onScreenShieldAlertPetOne = 1
 			elseif name == petTwo and onScreenShieldAlertPetTwo == 0 then
-				OnScreenMessage(string.format("|c000099%s\'s %s|r", petTwo, SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG))
+				OnScreenMessage(zo_strformat("|c000099<<1>>\'s <<2>>|r", petTwo, GetString(SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG)))
 				onScreenShieldAlertPetTwo = 1
 			end
 		else
@@ -286,8 +286,7 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 		local petOne = currentPets[1].unitName
 		if lowHealthAlertPercentage > 0 and powerValue < (powerMax*.01*lowHealthAlertPercentage) then
 			if onScreenHealthAlertPetOne == 0 then
-				OnScreenMessage(string.format("|cff0000%s %s|r", petOne, SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG))
-				--OnScreenMessage(zo_strformat(GetString(), petOne))
+				OnScreenMessage(zo_strformat("|cff0000<<1>> <<2>>|r", petOne, GetString(SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG)))
 				onScreenHealthAlertPetOne = 1
 			end
 		else
@@ -299,10 +298,10 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 		local petTwo = currentPets[2].unitName
 		if lowHealthAlertPercentage > 0 and powerValue < (powerMax*.01*lowHealthAlertPercentage) then
 			if name == petOne and onScreenHealthAlertPetOne == 0 then
-				OnScreenMessage(string.format("|cff0000%s %s|r", petOne, SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG))
+				OnScreenMessage(zo_strformat("|cff0000<<1>> <<2>>|r", petOne, GetString(SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG)))
 				onScreenHealthAlertPetOne = 1
 			elseif name == petTwo and onScreenHealthAlertPetTwo == 0 then
-				OnScreenMessage(string.format("|cff0000%s %s|r", petTwo, SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG))
+				OnScreenMessage(zo_strformat("|cff0000<<1>> <<2>>|r", petTwo, GetString(SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG)))
 				onScreenHealthAlertPetTwo = 1
 			end
 		else
@@ -515,6 +514,7 @@ local function LoadEvents()
 		end
 	end)
 	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_UNIT_DESTROYED, function(_, unitTag)
+		PetUnSummonedAlerts(unitTag)
 		local key = GetKeyWithData(unitTag)
 		if key ~= nil then
 			table.remove(currentPets, key)
@@ -668,6 +668,16 @@ local function SlashCommands()
         PetHealth.changeBackground(savedVars.showBackground)
 	end, GetString(SI_PET_HEALTH_LSC_BACKGROUND))
 
+	LSC:Register("/pethealthunsummonedalerts", function()
+		savedVars.petUnsummonedAlerts = not savedVars.petUnsummonedAlerts
+		if savedVars.petUnsummonedAlerts then
+			ChatOutput(GetString(SI_PET_HEALTH_UNSUMMONEDALERTS_ACTIVATED))
+		else
+			ChatOutput(GetString(SI_PET_HEALTH_UNSUMMONEDALERTS_DEACTIVATED))
+        end
+        PetHealth.unsummonedAlerts(savedVars.petUnsummonedAlerts)
+	end, GetString(SI_PET_HEALTH_LSC_UNSUMMONEDALERTS))
+
 	LSC:Register("/pethealthwarnhealth", function(healthValuePercent)
 		if healthValuePercent == nil or healthValuePercent == "" then
 			ChatOutput(GetString(SI_PET_HEALTH_LAM_LOW_HEALTH_WARN) .. ": " .. tostring(savedVars.lowHealthAlertSlider))
@@ -710,6 +720,8 @@ local function OnAddOnLoaded(_, addonName)
     PetHealth.savedVarsDefault = default
     lowHealthAlertPercentage = savedVars.lowHealthAlertSlider
 	lowShieldAlertPercentage = savedVars.lowShieldAlertSlider
+	unsummonedAlerts = savedVars.petUnsummonedAlerts
+	hideFrameUntilHealthPercentage = savedVars.hideFrameUntilHealthSlider
 
 	-- Addon is only enabled for the classIds which are given with the value true in the table PetHealth.supportedClasses
 	local getUnitClassId = GetUnitClassId(UNIT_PLAYER_TAG)
