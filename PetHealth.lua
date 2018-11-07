@@ -9,7 +9,7 @@ PetHealth.supportedClasses = {
 local addon = {
 	name 			= "PetHealth",
 	displayName 	= "PetHealth",
-    version         = "1.02",
+    version         = "1.03",
 	savedVarName	= "PetHealth_Save",
 	savedVarVersion = 2,
 	lamDisplayName 	= "PetHealth",
@@ -29,6 +29,8 @@ local default = {
 	showLabels = true,
 	lowHealthAlertSlider = 0,
 	lowShieldAlertSlider = 0,
+	petUnsummonedAlerts = false,
+	onlyInCombatHealthSlider = 0,
 	showBackground = true,
 	debug = false,
 }
@@ -41,24 +43,24 @@ local currentPets = {}
 local window = {}
 local inCombatAddon = false
 
---    lowHealthAlertPercentage(savedVars.lowHealthAlertSlider)
---    lowShieldAlertPercentage(savedVars.lowShieldAlertSlider)
-
+local AddOnManager = GetAddOnManager()
+local LSC
+local lowHealthAlertPercentage = 0
+local lowShieldAlertPercentage = 0
+local onlyInCombatHealthMax = 0
+local onlyInCombatHealthCurrent = 0
+local onlyInCombatHealthPercentage = 0
 local onScreenHealthAlertPetOne = 0
 local onScreenHealthAlertPetTwo = 0
 local onScreenShieldAlertPetOne = 0
 local onScreenShieldAlertPetTwo = 0
-local lowHealthAlertPercentage = 0
-local lowShieldAlertPercentage = 0
+local unsummonedAlerts = false
 
 local WINDOW_MANAGER = GetWindowManager()
 local WINDOW_WIDTH = 250
 local WINDOW_HEIGHT_ONE = 76
 local WINDOW_HEIGHT_TWO = 116
 local PET_BAR_FRAGMENT = nil
-
-local AddOnManager = GetAddOnManager()
-local LSC
 
 ----------
 -- UTIL --
@@ -152,17 +154,33 @@ local function SetPetWindowHidden(hidden, combatState)
 	local setToHidden = hidden
 	if combatState then
 		setToHidden = true
-	end	
+	end
 	PET_BAR_FRAGMENT:SetHiddenForReason("NoPetOrOnlyInCombat", setToHidden)
 	-- debug
 	--ChatOutput(string.format("SetPetWindowHidden() setToHidden: %s, onlyInCombat: %s", tostring(setToHidden), tostring(onlyInCombat)))
+end
+
+local function PetUnSummonedAlerts(unitTag)
+	if unsummonedAlerts then
+		local i = GetKeyWithData(unitTag)
+		if i == nil then
+			return
+		end
+		local petName = currentPets[i].unitName
+		local swimming = IsUnitSwimming("player")
+		local inCombat = IsUnitInCombat("player")
+		if swimming then
+			OnScreenMessage(string.format(GetString(SI_PET_HEALTH_UNSUMMONED_SWIMMING_MSG)))
+		elseif inCombat then
+			OnScreenMessage(zo_strformat("<<1>> <<2>>", petName, GetString(SI_PET_HEALTH_UNSUMMONED_MSG)))
+		end
+	end
 end
 
 local function RefreshPetWindow()
 	local countPets = #currentPets
 	local combatState = GetCombatState()
 	if PET_BAR_FRAGMENT:IsHidden() and countPets == 0 and combatState then
-		OnScreenMessage(string.format("Pet has died!"))
 		return 
 	end
 	local height = 0
@@ -180,6 +198,13 @@ local function RefreshPetWindow()
 			setToHidden = false			
 		end
 	end	
+	if not combatState and savedVars.onlyInCombat == true then
+		if onlyInCombatHealthPercentage == 0 then
+			setToHidden = false
+		elseif onlyInCombatHealthCurrent > (onlyInCombatHealthMax*.01*onlyInCombatHealthPercentage) then
+			setToHidden = true
+		end
+	end
 	base:SetHeight(height)
 	background:SetHeight(height)
 	-- set hidden state
@@ -204,7 +229,7 @@ local function OnShieldUpdate(handler, unitTag, value, maxValue, initial)
 		local petOne = currentPets[1].unitName
 		if lowShieldAlertPercentage > 0 and value < maxValue*.01*lowShieldAlertPercentage then
 			if onScreenShieldAlertPetOne == 0 then
-				OnScreenMessage(string.format("|c000099%s\'s shield is getting low!|r", petOne))
+				OnScreenMessage(zo_strformat("|c000099<<1>>\'s <<2>>|r", petOne, GetString(SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG)))
 				onScreenShieldAlertPetOne = 1
 			end
 		else
@@ -216,10 +241,10 @@ local function OnShieldUpdate(handler, unitTag, value, maxValue, initial)
 		local petTwo = currentPets[2].unitName
 		if lowShieldAlertPercentage > 0 and value < maxValue*.01*lowShieldAlertPercentage then
 			if name == petOne and onScreenShieldAlertPetOne == 0 then
-				OnScreenMessage(string.format("|c000099%s\'s shield is getting low!|r", petOne))
+				OnScreenMessage(zo_strformat("|c000099<<1>>\'s <<2>>|r", petOne, GetString(SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG)))
 				onScreenShieldAlertPetOne = 1
 			elseif name == petTwo and onScreenShieldAlertPetTwo == 0 then
-				OnScreenMessage(string.format("|c000099%s\'s shield is getting low!|r", petTwo))
+				OnScreenMessage(zo_strformat("|c000099<<1>>\'s <<2>>|r", petTwo, GetString(SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG)))
 				onScreenShieldAlertPetTwo = 1
 			end
 		else
@@ -262,6 +287,11 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 	--[[
 	Zeigt das Leben des Begleiters an.
 	]]
+	if onlyInCombatHealthPercentage > 0 and savedVars.onlyInCombat == true then
+		onlyInCombatHealthMax = powerMax
+		onlyInCombatHealthCurrent = powerValue
+		RefreshPetWindow()
+	end
 	local i = GetKeyWithData(unitTag)
 	if i == nil then
 		--ChatOutput(string.format("OnHealthUpdate() unitTag: %s - pet not active", unitTag))
@@ -270,8 +300,7 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 		local petOne = currentPets[1].unitName
 		if lowHealthAlertPercentage > 0 and powerValue < (powerMax*.01*lowHealthAlertPercentage) then
 			if onScreenHealthAlertPetOne == 0 then
-				OnScreenMessage(string.format("|cff0000%s is low on health!|r", petOne))
-				--OnScreenMessage(zo_strformat(GetString(), petOne))
+				OnScreenMessage(zo_strformat("|cff0000<<1>> <<2>>|r", petOne, GetString(SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG)))
 				onScreenHealthAlertPetOne = 1
 			end
 		else
@@ -283,10 +312,10 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 		local petTwo = currentPets[2].unitName
 		if lowHealthAlertPercentage > 0 and powerValue < (powerMax*.01*lowHealthAlertPercentage) then
 			if name == petOne and onScreenHealthAlertPetOne == 0 then
-				OnScreenMessage(string.format("|cff0000%s is low on health!|r", petOne))
+				OnScreenMessage(zo_strformat("|cff0000<<1>> <<2>>|r", petOne, GetString(SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG)))
 				onScreenHealthAlertPetOne = 1
 			elseif name == petTwo and onScreenHealthAlertPetTwo == 0 then
-				OnScreenMessage(string.format("|cff0000%s is low on health!|r", petTwo))
+				OnScreenMessage(zo_strformat("|cff0000<<1>> <<2>>|r", petTwo, GetString(SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG)))
 				onScreenHealthAlertPetTwo = 1
 			end
 		else
@@ -499,6 +528,7 @@ local function LoadEvents()
 		end
 	end)
 	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_UNIT_DESTROYED, function(_, unitTag)
+		PetUnSummonedAlerts(unitTag)
 		local key = GetKeyWithData(unitTag)
 		if key ~= nil then
 			table.remove(currentPets, key)
@@ -590,6 +620,16 @@ function PetHealth.lowShieldAlertPercentage(toValue)
 	lowShieldAlertPercentage = toValue
 end
 
+function PetHealth.unsummonedAlerts(toValue)
+	unsummonedAlerts = toValue
+end
+
+function PetHealth.onlyInCombatHealthPercentage(toValue)
+	onlyInCombatHealthPercentage = toValue
+end
+
+
+
 local function SlashCommands()
 
 	-- LSC:Register("/pethealthdebug", function()
@@ -642,13 +682,23 @@ local function SlashCommands()
         PetHealth.changeBackground(savedVars.showBackground)
 	end, GetString(SI_PET_HEALTH_LSC_BACKGROUND))
 
+	LSC:Register("/pethealthunsummonedalerts", function()
+		savedVars.petUnsummonedAlerts = not savedVars.petUnsummonedAlerts
+		if savedVars.petUnsummonedAlerts then
+			ChatOutput(GetString(SI_PET_HEALTH_UNSUMMONEDALERTS_ACTIVATED))
+		else
+			ChatOutput(GetString(SI_PET_HEALTH_UNSUMMONEDALERTS_DEACTIVATED))
+        end
+        PetHealth.unsummonedAlerts(savedVars.petUnsummonedAlerts)
+	end, GetString(SI_PET_HEALTH_LSC_UNSUMMONEDALERTS))
+
 	LSC:Register("/pethealthwarnhealth", function(healthValuePercent)
 		if healthValuePercent == nil or healthValuePercent == "" then
 			ChatOutput(GetString(SI_PET_HEALTH_LAM_LOW_HEALTH_WARN) .. ": " .. tostring(savedVars.lowHealthAlertSlider))
 		else
 			local healthValuePercentNumber = tonumber(healthValuePercent)
 			if type(healthValuePercentNumber) == "number" then
-				if healthValuePercentNumber < 0 then healthValuePercentNumber = 0 end
+				if healthValuePercentNumber <= 0 then healthValuePercentNumber = 0 end
 				if healthValuePercentNumber >= 100 then healthValuePercentNumber = 99 end
 				savedVars.lowHealthAlertSlider = healthValuePercentNumber
 				PetHealth.lowHealthAlertPercentage(healthValuePercentNumber)
@@ -663,7 +713,7 @@ local function SlashCommands()
 		else
 			local shieldValuePercentNumber = tonumber(shieldValuePercent)
 			if type(shieldValuePercentNumber) == "number" then
-				if shieldValuePercentNumber < 0 then shieldValuePercentNumber = 0 end
+				if shieldValuePercentNumber <= 0 then shieldValuePercentNumber = 0 end
 				if shieldValuePercentNumber >= 100 then shieldValuePercentNumber = 99 end
 				savedVars.lowShieldAlertSlider = shieldValuePercentNumber
 				PetHealth.lowShieldAlertPercentage(shieldValuePercentNumber)
@@ -671,6 +721,21 @@ local function SlashCommands()
 			end
 		end
 	end, GetString(SI_PET_HEALTH_LSC_WARN_SHIELD))
+
+	LSC:Register("/pethealthcombathealth", function(combatHealthValuePercent)
+		if combatHealthValuePercent == nil or combatHealthValuePercent == "" then
+			ChatOutput(GetString(SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH) .. ": " .. tostring(savedVars.onlyInCombatHealthSlider))
+		else
+			local combatHealthPercentNumber = tonumber(combatHealthValuePercent)
+			if type(combatHealthPercentNumber) == "number" then
+				if combatHealthPercentNumber <= 0 then combatHealthPercentNumber = 0 end
+				if combatHealthPercentNumber >= 100 then combatHealthPercentNumber = 99 end
+				savedVars.onlyInCombatHealthSlider = combatHealthPercentNumber
+				PetHealth.onlyInCombatHealthPercentage(combatHealthPercentNumber)
+				ChatOutput(GetString(SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH) .. ": " .. tostring(combatHealthPercentNumber))
+			end
+		end
+	end, GetString(SI_PET_HEALTH_LSC_COMBAT_HEALTH))
 end
 
 local function OnAddOnLoaded(_, addonName)
@@ -684,6 +749,8 @@ local function OnAddOnLoaded(_, addonName)
     PetHealth.savedVarsDefault = default
     lowHealthAlertPercentage = savedVars.lowHealthAlertSlider
 	lowShieldAlertPercentage = savedVars.lowShieldAlertSlider
+	unsummonedAlerts = savedVars.petUnsummonedAlerts
+	onlyInCombatHealthPercentage = savedVars.onlyInCombatHealthSlider
 
 	-- Addon is only enabled for the classIds which are given with the value true in the table PetHealth.supportedClasses
 	local getUnitClassId = GetUnitClassId(UNIT_PLAYER_TAG)

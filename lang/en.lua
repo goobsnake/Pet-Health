@@ -7,18 +7,25 @@ local strings = {
 	SI_PET_HEALTH_LABELS_DEACTIVATED = "Pet health labels are disabled.",
 	SI_PET_HEALTH_BACKGROUND_ACTIVATED = "Pet health frame background is enabled.",
 	SI_PET_HEALTH_BACKGROUND_DEACTIVATED = "Pet health frame background is disabled.",
+	SI_PET_HEALTH_UNSUMMONEDALERTS_ACTIVATED = "Pet health unsummoned alerts are enabled.",
+	SI_PET_HEALTH_UNSUMMONEDALERTS_DEACTIVATED = "Pet health unsummoned alerts are disabled.",
 	SI_PET_HEALTH_CLASS = "Your class is not supported with this addon.",
 	-- SLASH COMMANDS
 	SI_PET_HEALTH_LSC_DEBUG = "Toggle debug mode.",
 	SI_PET_HEALTH_LSC_COMBAT = "Toggle pet window in combat.",
+	SI_PET_HEALTH_LSC_COMBAT_HEALTH = "Set health % to activate the only in combat setting. Specify an unsigned integer value between 0 and 99!",
 	SI_PET_HEALTH_LSC_VALUES = "Toggle pet attribute values. Needs to also be enabled in the ESO combat settings.",
 	SI_PET_HEALTH_LSC_LABELS = "Toggle pet name labels.",
 	SI_PET_HEALTH_LSC_BACKGROUND = "Toggle pet window background.",
+	SI_PET_HEALTH_LSC_UNSUMMONEDALERTS = "Toggle on-screen alerts when a pet is unsummoned or killed.",
 	SI_PET_HEALTH_LSC_WARN_HEALTH = "Set warning threshold in % for the pet's health. Specify an unsigned integer value between 0 and 99!",
 	SI_PET_HEALTH_LSC_WARN_SHIELD = "Set warning threshold in % for the pet's shield. Specify an unsigned integer value between 0 and 99!",
 	--Low health/shield warnings
-	SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG = "\"|cff0000<<C:1>>\" is low on health!|r",
-	SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG = "\"|cff0000<<C:1>>'s\" shield is weak!|r",
+	SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG = "is low on health!",
+	SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG = "shield is weak!",
+	--Unsummoned messages
+	SI_PET_HEALTH_UNSUMMONED_SWIMMING_MSG = "All pets unsummoned while swimming!",
+	SI_PET_HEALTH_UNSUMMONED_MSG = "has been killed!",
 	--LAM Settings menu
 	SI_PET_HEALTH_DESC					= "Show info about your pets",
 	SI_PET_HEALTH_SAVE_TYPE				= "Save type",
@@ -32,6 +39,8 @@ local strings = {
 	SI_PET_HEALTH_LAM_LABELS_TT			= 'Show the labels at the PetHealth UI',
 	SI_PET_HEALTH_LAM_VALUES			= 'Show values',
 	SI_PET_HEALTH_LAM_VALUES_TT			= 'Show the values at the PetHealth UI.\nThe values are shown like you have defined them in the standard ESO settings for unit frames!',
+	SI_PET_HEALTH_LAM_UNSUMMONED_ALERT	= 'Unsummoned Alerts',
+	SI_PET_HEALTH_LAM_UNSUMMONED_ALERT_TT = 'Shows on-screen alerts when a pet is unsummoned',
 	SI_PET_HEALTH_LAM_LOW_HEALTH_WARN	= "Low Health Alert Percentage",
 	SI_PET_HEALTH_LAM_LOW_HEALTH_WARN_TT= "Displays an on-screen alert depending on the pet health percentage value chosen",
 	SI_PET_HEALTH_LAM_LOW_SHIELD_WARN	= "Low Shield Alert Percentage",
@@ -39,6 +48,8 @@ local strings = {
 	SI_PET_HEALTH_LAM_HEADER_BEHAVIOR   = "Behavior changes",
 	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT	= "Only in combat",
 	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_TT	= "Show the PetHealth UI only if you are in combat",
+	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH	= "Health percent for the only in combat setting",
+	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH_TT	= "Show the PetHealth UI only if you are in combat and a pet is at or below the health percentage ",
 }
 
 for stringId, stringValue in pairs(strings) do
