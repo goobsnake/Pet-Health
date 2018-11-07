@@ -152,11 +152,11 @@ function PetHealth.buildLAMAddonMenu()
         },
         {
             type = "slider",
-            name = GetString(SI_PET_HEALTH_LAM_LOW_HEALTH_WARN),
-            tooltip = GetString(SI_PET_HEALTH_LAM_LOW_HEALTH_WARN_TT),
-            getFunc = function() return settings.hideFrameUntilHealthSlider end,
-            setFunc = function(value) settings.hideFrameUntilHealthSlider = value 
-                PetHealth.hideFrameUntilHealthPercentage(value) 
+            name = GetString(SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH),
+            tooltip = GetString(SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH_TT),
+            getFunc = function() return settings.onlyInCombatHealthSlider end,
+            setFunc = function(value) settings.onlyInCombatHealthSlider = value 
+                PetHealth.onlyInCombatHealthPercentage(value) 
             end,
             min = 0,
             max = 99,
@@ -166,7 +166,7 @@ function PetHealth.buildLAMAddonMenu()
             autoSelect = false, 
             inputLocation = "right",
             width = "full",
-            default = defaults.hideFrameUntilHealthSlider,
+            default = defaults.onlyInCombatHealthSlider,
         },
     } -- optionsTable
     -- END OF OPTIONS TABLE

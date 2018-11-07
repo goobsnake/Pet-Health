@@ -12,6 +12,8 @@ SafeAddString(SI_PET_HEALTH_CLASS , "Deine Klasse wird nicht unterstützt.")
 -- SLASH COMMANDS
 SafeAddString(SI_PET_HEALTH_LSC_DEBUG , "Zwischen Debug Modus umschalten.")
 SafeAddString(SI_PET_HEALTH_LSC_COMBAT , "Aktiviere/Deaktiviere das Begleiterfenster ausserhalb des Kampfes.")
+SafeAddString(SI_PET_HEALTH_LSC_COMBAT_HEALTH , "Setze Gesundheit %, um nur in der Kampfeinstellung aktiviert zu werden. Geben Sie einen vorzeichenlosen Integerwert zwischen 0 und 99 an!")
+
 SafeAddString(SI_PET_HEALTH_LSC_VALUES , "Aktiviere/Deaktiviere die Ressourcenanzeige der Begleiter. Diese müssen in den Einstellungen eingerichtet werden.")
 SafeAddString(SI_PET_HEALTH_LSC_LABELS , "Aktiviere/Deaktiviere die Namenanzeige der Begleiter.")
 SafeAddString(SI_PET_HEALTH_LSC_BACKGROUND , "Aktiviere/Deaktiviere den Hintergrund des Begleiterfensters.")
@@ -47,3 +49,5 @@ SafeAddString(SI_PET_HEALTH_LAM_LOW_SHIELD_WARN_TT,         "Zeigt eine Bildschi
 SafeAddString(SI_PET_HEALTH_LAM_HEADER_BEHAVIOR,            "Verhaltens-Veränderungen")
 SafeAddString(SI_PET_HEALTH_LAM_ONLY_IN_COMBAT,             "Nur im Kampf")
 SafeAddString(SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_TT,          "Zeiogt die PetHealth Oberfläche nur im Kampf an")
+SafeAddString(SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH, 		"Gesundheitsprozentsatz, der nur in einer Kampfeinstellung aktiviert werden kann")
+SafeAddString(SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH_TT,	"Zeigen Sie die PetHealth-Benutzeroberfläche nur dann, wenn Sie sich im Kampf befinden und ein Haustier den Gesundheits-Prozentsatz erreicht oder unterschreitet")

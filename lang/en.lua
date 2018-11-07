@@ -13,6 +13,7 @@ local strings = {
 	-- SLASH COMMANDS
 	SI_PET_HEALTH_LSC_DEBUG = "Toggle debug mode.",
 	SI_PET_HEALTH_LSC_COMBAT = "Toggle pet window in combat.",
+	SI_PET_HEALTH_LSC_COMBAT_HEALTH = "Set health % to activate the only in combat setting. Specify an unsigned integer value between 0 and 99!",
 	SI_PET_HEALTH_LSC_VALUES = "Toggle pet attribute values. Needs to also be enabled in the ESO combat settings.",
 	SI_PET_HEALTH_LSC_LABELS = "Toggle pet name labels.",
 	SI_PET_HEALTH_LSC_BACKGROUND = "Toggle pet window background.",
@@ -47,6 +48,8 @@ local strings = {
 	SI_PET_HEALTH_LAM_HEADER_BEHAVIOR   = "Behavior changes",
 	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT	= "Only in combat",
 	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_TT	= "Show the PetHealth UI only if you are in combat",
+	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH	= "Health percent for the only in combat setting",
+	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH_TT	= "Show the PetHealth UI only if you are in combat and a pet is at or below the health percentage ",
 }
 
 for stringId, stringValue in pairs(strings) do
