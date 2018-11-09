@@ -99,6 +99,15 @@ function PetHealth.buildLAMAddonMenu()
             width="full",
         },
         {
+            type = "checkbox",
+            name = GetString(SI_PET_HEALTH_LAM_USE_ZOS_STYLE),
+            tooltip = GetString(SI_PET_HEALTH_LAM_USE_ZOS_STYLE_TT),
+            getFunc = function() return settings.useZosStyle end,
+            setFunc = function(value) settings.useZosStyle = value end,
+            width = "full",
+            requiresReload = true,
+        },
+        {
 		    type = "slider",
 		    name = GetString(SI_PET_HEALTH_LAM_LOW_HEALTH_WARN),
             tooltip = GetString(SI_PET_HEALTH_LAM_LOW_HEALTH_WARN_TT),

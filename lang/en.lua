@@ -50,6 +50,8 @@ local strings = {
 	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_TT	= "Show the PetHealth UI only if you are in combat",
 	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH	= "Health percent for the only in combat setting",
 	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH_TT	= "Show the PetHealth UI only if you are in combat and a pet is at or below the health percentage ",
+	SI_PET_HEALTH_LAM_USE_ZOS_STYLE = "Use ZOS Style",
+	SI_PET_HEALTH_LAM_USE_ZOS_STYLE_TT = "Use the arrow status bars instead of the rectanguler ones",
 }
 
 for stringId, stringValue in pairs(strings) do

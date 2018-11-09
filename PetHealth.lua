@@ -32,6 +32,7 @@ local default = {
 	petUnsummonedAlerts = false,
 	onlyInCombatHealthSlider = 0,
 	showBackground = true,
+	useZosStyle = false,
 	debug = false,
 }
 
@@ -255,18 +256,38 @@ local function OnShieldUpdate(handler, unitTag, value, maxValue, initial)
 			end
 		end
 	end
-	local ctrl = window[i].shield
+	local ctrl, ctrlr;
+	if (not savedVars.useZosStyle) then
+		ctrl = window[i].shield
+	else
+		ctrl = window[i].shieldleft
+		ctrlr = window[i].shieldright
+	end
+
 	if handler ~= nil then
 		if not ctrl:IsHidden() or value == 0 then
 			ctrl:SetHidden(true)
+			if (savedVars.useZosStyle) then
+				ctrlr:SetHidden(true)
+			end
 		end
 	else
 		if ctrl:IsHidden() then
 			ctrl:SetHidden(false)
+			if (savedVars.useZosStyle) then
+				ctrlr:SetHidden(false)
+			end
 		end
 	end
 	if maxValue > 0 then
-		ZO_StatusBar_SmoothTransition(window[i].shield, value, maxValue, (initial == "true" and true or false))
+		if (savedVars.useZosStyle) then
+			value = value / 2;
+			maxValue = maxValue / 2;
+			ZO_StatusBar_SmoothTransition(window[i].shieldleft, value, maxValue, (initial == "true" and true or false))
+			ZO_StatusBar_SmoothTransition(window[i].shieldRight, value, maxValue, (initial == "true" and true or false))
+		else
+			ZO_StatusBar_SmoothTransition(window[i].shield, value, maxValue, (initial == "true" and true or false))
+		end
 	end
 end
 
@@ -329,7 +350,14 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 	-- health values
 	window[i].values:SetText(ZO_FormatResourceBarCurrentAndMax(powerValue, powerMax))
 	-- health bar
-	ZO_StatusBar_SmoothTransition(window[i].healthbar, powerValue, powerMax, (initial == "true" and true or false))
+	if (savedVars.useZosStyle) then
+		powerValue = powerValue / 2
+		powerMax = powerMax / 2
+		ZO_StatusBar_SmoothTransition(window[i].barleft, powerValue, powerMax, (initial == "true" and true or false))
+		ZO_StatusBar_SmoothTransition(window[i].barright, powerValue, powerMax, (initial == "true" and true or false))
+	else
+		ZO_StatusBar_SmoothTransition(window[i].healthbar, powerValue, powerMax, (initial == "true" and true or false))
+	end
 end
 
 local function GetHealth(unitTag)
@@ -410,7 +438,28 @@ local function CreateControls()
 		c:SetDrawLevel(level)
 		return c, c
 	end
-	
+
+	-- For ZOS Style
+	local controlIndex = nil
+	local function SetVirtualControlIndex(i)
+		controlIndex = i
+	end
+	local function AddControlFromVirtual(parent, template, nameSuffix)
+		local name = "PetHealth"..controlIndex..template:gsub("ZO_PlayerAttribute", "")..(nameSuffix or "")
+		local c = WINDOW_MANAGER:CreateControlFromVirtual(name, parent, template)
+		return c, c
+	end
+
+	local function SetColors(self)
+		local powerType = self.powerType
+    	local gradient = ZO_POWER_BAR_GRADIENT_COLORS[powerType]
+    	for i, control in ipairs(self.barControls) do
+       		ZO_StatusBar_SetGradientColor(control, gradient)
+        	control:SetFadeOutLossColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_FADE_OUT, powerType))
+        	control:SetFadeOutGainColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_FADE_IN, powerType))
+    	end
+    end	
+
 	---------------
 	-- TOP LAYER --
 	---------------
@@ -448,63 +497,131 @@ local function CreateControls()
 	--------------
 	-- PET BARS --
 	--------------
-	for i=1,2 do
-		-- frame
-		window[i], ctrl = AddControl(base, CT_BACKDROP, 5)
-		ctrl:SetDimensions(baseWidth*0.8, 36)
-		ctrl:SetCenterColor(1,0,1,0)
-		ctrl:SetEdgeColor(1,0,1,0)
-		ctrl:SetAnchor(CENTER, base)
-	
-		-- label
-		local windowHeight = window[i]:GetHeight()
-		window[i].label, ctrl = AddControl(window[i], CT_LABEL, 10)
-		ctrl:SetFont("$(BOLD_FONT)|$(KB_16)|soft-shadow-thin")
-		ctrl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
-		ctrl:SetDimensions(baseWidth, windowHeight*0.4)
-		ctrl:SetAnchor(TOPLEFT, window[i])
-		ctrl:SetAlpha(GetAlphaFromControl(savedVars.showLabels))
+	if (not savedVars.useZosStyle) then
+		for i=1,2 do
+			-- frame
+			window[i], ctrl = AddControl(base, CT_BACKDROP, 5)
+			ctrl:SetDimensions(baseWidth*0.8, 36)
+			ctrl:SetCenterColor(1,0,1,0)
+			ctrl:SetEdgeColor(1,0,1,0)
+			ctrl:SetAnchor(CENTER, base)
 		
-		-- border and background
-		window[i].border, ctrl = AddControl(window[i], CT_BACKDROP, 20)
-		ctrl:SetDimensions(window[i]:GetWidth(), windowHeight*0.45)
-		ctrl:SetCenterColor(0,0,0,.6)
-		ctrl:SetEdgeColor(1,1,1,0.4)
-		ctrl:SetEdgeTexture("", 1, 1, 1)
-		ctrl:SetAnchor(BOTTOM, window[i])
-		
-		-- healthbar
-		local borderWidth = window[i].border:GetWidth()
-		local borderHeight = window[i].border:GetHeight()
-		window[i].healthbar, ctrl = AddControl(window[i].border, CT_STATUSBAR, 30)
-		ctrl:SetColor(1,1,1,0.5)
-		ctrl:SetGradientColors(.45, .13, .13, 1, .85, .19, .19, 1)
-		ctrl:SetDimensions(borderWidth-2, borderHeight-2)
-		ctrl:SetAnchor(CENTER, window[i].border)
-		
-		-- shield
-		window[i].shield, ctrl = AddControl(window[i].healthbar, CT_STATUSBAR, 40)
-		ctrl:SetColor(1,1,1,0.5)
-		ctrl:SetGradientColors(.5, .5, 1, .3, .25, .25, .5, .5)
-		ctrl:SetDimensions(borderWidth-2, borderHeight-2)
-		ctrl:SetAnchor(CENTER, window[i].healthbar)
-		ctrl:SetValue(0)
-		ctrl:SetMinMax(0,1)
+			-- label
+			local windowHeight = window[i]:GetHeight()
+			window[i].label, ctrl = AddControl(window[i], CT_LABEL, 10)
+			ctrl:SetFont("$(BOLD_FONT)|$(KB_16)|soft-shadow-thin")
+			ctrl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
+			ctrl:SetDimensions(baseWidth, windowHeight*0.4)
+			ctrl:SetAnchor(TOPLEFT, window[i])
+			ctrl:SetAlpha(GetAlphaFromControl(savedVars.showLabels))
+			
+			-- border and background
+			window[i].border, ctrl = AddControl(window[i], CT_BACKDROP, 20)
+			ctrl:SetDimensions(window[i]:GetWidth(), windowHeight*0.45)
+			ctrl:SetCenterColor(0,0,0,.6)
+			ctrl:SetEdgeColor(1,1,1,0.4)
+			ctrl:SetEdgeTexture("", 1, 1, 1)
+			ctrl:SetAnchor(BOTTOM, window[i])
+			
+			-- healthbar
+			local borderWidth = window[i].border:GetWidth()
+			local borderHeight = window[i].border:GetHeight()
+			window[i].healthbar, ctrl = AddControl(window[i].border, CT_STATUSBAR, 30)
+			ctrl:SetColor(1,1,1,0.5)
+			ctrl:SetGradientColors(.45, .13, .13, 1, .85, .19, .19, 1)
+			ctrl:SetDimensions(borderWidth-2, borderHeight-2)
+			ctrl:SetAnchor(CENTER, window[i].border)
+			
+			-- shield
+			window[i].shield, ctrl = AddControl(window[i].healthbar, CT_STATUSBAR, 40)
+			ctrl:SetColor(1,1,1,0.5)
+			ctrl:SetGradientColors(.5, .5, 1, .3, .25, .25, .5, .5)
+			ctrl:SetDimensions(borderWidth-2, borderHeight-2)
+			ctrl:SetAnchor(CENTER, window[i].healthbar)
+			ctrl:SetValue(0)
+			ctrl:SetMinMax(0,1)
 
-		-- values
-		window[i].values, ctrl = AddControl(window[i].healthbar, CT_LABEL, 50)
-		ctrl:SetFont("$(BOLD_FONT)|$(KB_14)|soft-shadow-thin")
-		ctrl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
-		ctrl:SetAnchor(CENTER, window[i].healthbar)
-		ctrl:SetAlpha(GetAlphaFromControl(savedVars.showValues))
-		-- ctrl:SetHidden(not savedVars.showValues or false)
-		
-		-- clear anchors to reset it
-		window[i]:ClearAnchors()
+			-- values
+			window[i].values, ctrl = AddControl(window[i].healthbar, CT_LABEL, 50)
+			ctrl:SetFont("$(BOLD_FONT)|$(KB_14)|soft-shadow-thin")
+			ctrl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
+			ctrl:SetAnchor(CENTER, window[i].healthbar)
+			ctrl:SetAlpha(GetAlphaFromControl(savedVars.showValues))
+			-- ctrl:SetHidden(not savedVars.showValues or false)
+			
+			-- clear anchors to reset it
+			window[i]:ClearAnchors()
+		end
+
+		window[1]:SetAnchor(TOP, base, TOP, 0, 18)
+		window[2]:SetAnchor(TOP, window[1], BOTTOM, 0, 2)
+	else
+		for i=1,2 do
+			SetVirtualControlIndex(i)
+			window[i], ctrl = AddControlFromVirtual(base, "ZO_PlayerAttributeContainer")
+			window[i].bgcontainer, ctrl = AddControlFromVirtual(window[i], "ZO_PlayerAttributeBgContainer")
+			window[i].bgcontainer.left, ctrl = AddControlFromVirtual(window[i].bgcontainer, "ZO_PlayerAttributeBgLeftArrow")
+			window[i].bgcontainer.right, ctrl = AddControlFromVirtual(window[i].bgcontainer, "ZO_PlayerAttributeBgRightArrow")
+			window[i].bgcontainer.center, ctrl = AddControlFromVirtual(window[i].bgcontainer, "ZO_PlayerAttributeBgCenter")
+
+			-- label
+			local windowHeight = window[i]:GetHeight()
+			window[i].label, ctrl = AddControl(window[i], CT_LABEL, 10)
+			ctrl:SetFont("$(BOLD_FONT)|$(KB_16)|soft-shadow-thin")
+			ctrl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
+			ctrl:SetDimensions(baseWidth, windowHeight*0.4)
+			ctrl:SetAnchor(BOTTOMLEFT, window[i], TOPLEFT, 0, -12)
+			ctrl:SetAlpha(GetAlphaFromControl(savedVars.showLabels))
+
+			-- bars
+			window[i].barleft, ctrl = AddControlFromVirtual(window[i], "ZO_PlayerAttributeStatusBar", "Left")	
+			ctrl:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
+			ctrl:SetAnchor(LEFT)
+			ctrl:SetAnchor(RIGHT, window[i], CENTER)
+			window[i].barleft.gloss, ctrl = AddControlFromVirtual(window[i].barleft, "ZO_PlayerAttributeStatusBarGloss", "Left")
+			ctrl:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
+			window[i].barright, ctrl = AddControlFromVirtual(window[i], "ZO_PlayerAttributeStatusBar", "Right")
+			ctrl:SetAnchor(RIGHT)
+			ctrl:SetAnchor(LEFT, window[i], CENTER)
+			window[i].barright.gloss, ctrl = AddControlFromVirtual(window[i].barright, "ZO_PlayerAttributeStatusBarGloss", "Right")
+			window[i].frameleft, ctrl = AddControlFromVirtual(window[i], "ZO_PlayerAttributeFrameLeftArrow")
+			window[i].frameright, ctrl = AddControlFromVirtual(window[i], "ZO_PlayerAttributeFrameRightArrow")
+			window[i].framecenter, ctrl = AddControlFromVirtual(window[i], "ZO_PlayerAttributeFrameCenter")
+
+			window[i].barControls = { window[i].barleft, window[i].barright }
+			window[i].powerType = POWERTYPE_HEALTH
+
+			SetColors(window[i])
+
+			-- shield
+			window[i].shieldleft, ctrl = AddControlFromVirtual(window[i], "ZO_PlayerAttributeStatusBar", "LeftShield")
+			ctrl:SetDrawLevel(900)
+			ctrl:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
+	        ctrl:SetAnchor(LEFT)
+	        ctrl:SetAnchor(RIGHT, window[i], CENTER)
+			window[i].shieldleft.gloss = AddControlFromVirtual(window[i].shieldleft, "ZO_PlayerAttributeStatusBarGloss", "LeftShield")
+			ctrl:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
+			window[i].shieldright, ctrl = AddControlFromVirtual(window[i], "ZO_PlayerAttributeStatusBar", "RightShield")
+			ctrl:SetDrawLevel(900)
+			ctrl:SetAnchor(RIGHT)
+			ctrl:SetAnchor(LEFT, window[i], CENTER)
+			window[i].shieldright.gloss = AddControlFromVirtual(window[i].shieldright, "ZO_PlayerAttributeStatusBarGloss", "RightShield")
+
+			-- values
+			window[i].values, ctrl = AddControl(window[i].framecenter, CT_LABEL, 50)
+			ctrl:SetFont("$(BOLD_FONT)|$(KB_14)|soft-shadow-thin")
+			ctrl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
+			ctrl:SetAnchor(CENTER, window[i].framecenter)
+			ctrl:SetAlpha(GetAlphaFromControl(savedVars.showValues))
+			-- ctrl:SetHidden(not savedVars.showValues or false)
+			
+			-- clear anchors to reset it
+			window[i]:ClearAnchors()
+		end
+
+		window[1]:SetAnchor(TOP, base, TOP, 0, 18)
+		window[2]:SetAnchor(TOP, window[1], BOTTOM, 0, 20)	
 	end
-
-	window[1]:SetAnchor(TOP, base, TOP, 0, 18)
-	window[2]:SetAnchor(TOP, window[1], BOTTOM, 0, 2)
 
 	-----------
 	-- SCENE --
