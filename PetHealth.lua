@@ -452,13 +452,13 @@ local function CreateControls()
 
 	local function SetColors(self)
 		local powerType = self.powerType
-    	local gradient = ZO_POWER_BAR_GRADIENT_COLORS[powerType]
-    	for i, control in ipairs(self.barControls) do
-       		ZO_StatusBar_SetGradientColor(control, gradient)
-        	control:SetFadeOutLossColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_FADE_OUT, powerType))
-        	control:SetFadeOutGainColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_FADE_IN, powerType))
-    	end
-    end	
+		local gradient = ZO_POWER_BAR_GRADIENT_COLORS[powerType]
+		for i, control in ipairs(self.barControls) do
+			ZO_StatusBar_SetGradientColor(control, gradient)
+			control:SetFadeOutLossColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_FADE_OUT, powerType))
+			control:SetFadeOutGainColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_FADE_IN, powerType))
+   		end
+   	end	
 
 	---------------
 	-- TOP LAYER --
