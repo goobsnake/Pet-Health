@@ -16,3 +16,4 @@ lang/$(language).lua
 
 PetHealth_settingsMenu.lua
 PetHealth.lua
+PetHealthTemplates.xml

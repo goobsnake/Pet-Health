@@ -369,6 +369,8 @@ end
 -----------
 -- STATS --
 -----------
+local RefreshWarnerEvents
+
 local function GetControlText(control)
 	local controlText = control:GetText()
 	if controlText ~= nil then return controlText end
@@ -385,6 +387,9 @@ local function UpdatePetStats(unitTag)
 	local control = window[i].label
 	if GetControlText(control) ~= name then
 		window[i].label:SetText(name)
+		if (savedVars.useZosStyle) then
+			RefreshWarnerEvents(window[i], unitTag)
+		end
 	end
 	GetHealth(unitTag)
 	GetShield(unitTag)
@@ -424,6 +429,82 @@ local function OnPlayerCombatState(_, inCombat)
 	RefreshPetWindow()
 end
 
+local PetHealthWarner
+
+local function CreateWarner()
+	if savedVars.useZosStyle then
+		local HEALTH_ALPHA_PULSE_THRESHOLD = 0.25
+
+		PetHealthWarner = ZO_Object:Subclass()
+
+		function PetHealthWarner:New(...)
+		    local warner = ZO_Object.New(self)
+		    warner:Initialize(...)
+		    return warner
+		end
+
+		function PetHealthWarner:Initialize(parent)
+		    self.warning = GetControl(parent, "Warner")
+
+		    self.OnPowerUpdate = function(_, unitTag, powerIndex, powerType, health, maxHealth)
+		        self:OnHealthUpdate(health, maxHealth)
+		    end
+		    local function OnPlayerActivated()
+		        local current, max = GetUnitPower(self.unitTag, POWERTYPE_HEALTH)
+		        self:OnHealthUpdate(current, max)
+		    end
+
+		    self.warning:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
+
+		    self.warnAnimation = ZO_AlphaAnimation:New(self.warning)
+		    self.statusBar = parent
+		    self.paused = false
+		end
+
+		function PetHealthWarner:SetPaused(paused)
+		    if self.paused ~= paused then
+		        self.paused = paused
+		        if paused then
+		            if self.warnAnimation:IsPlaying() then
+		                self.warnAnimation:Stop()
+		            end
+		        else
+		            local current, max = GetUnitPower("player", POWERTYPE_HEALTH)
+		            self.warning:SetAlpha(0)
+		            self:UpdateAlphaPulse(current / max)
+		        end
+		    end
+		end
+
+		function PetHealthWarner:UpdateAlphaPulse(healthPerc)
+		    if healthPerc <= HEALTH_ALPHA_PULSE_THRESHOLD then
+		        if not self.warnAnimation:IsPlaying() then
+		            self.warnAnimation:PingPong(0, 1, RESOURCE_WARNER_FLASH_TIME)
+		        end
+		    else
+		        if self.warnAnimation:IsPlaying() then
+		            self.warnAnimation:Stop()
+		            self.warning:SetAlpha(0)
+		        end
+		    end
+		end
+
+		function PetHealthWarner:OnHealthUpdate(health, maxHealth)
+		    if not self.paused then
+		        local healthPerc = health / maxHealth
+		        self:UpdateAlphaPulse(healthPerc)
+		    end
+		end
+
+		RefreshWarnerEvents = function(window, unitTag)
+			local warner = window.warner;
+			warner.unitTag = unitTag;
+			warner.warning:UnregisterForEvent(EVENT_POWER_UPDATE)
+			warner.warning:RegisterForEvent(EVENT_POWER_UPDATE, warner.OnPowerUpdate)
+		    warner.warning:AddFilterForEvent(EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, POWERTYPE_HEALTH, REGISTER_FILTER_UNIT_TAG, unitTag);
+		end
+	end
+end
 
 --------------
 -- CONTROLS --
@@ -438,27 +519,6 @@ local function CreateControls()
 		c:SetDrawLevel(level)
 		return c, c
 	end
-
-	-- For ZOS Style
-	local controlIndex = nil
-	local function SetVirtualControlIndex(i)
-		controlIndex = i
-	end
-	local function AddControlFromVirtual(parent, template, nameSuffix)
-		local name = "PetHealth"..controlIndex..template:gsub("ZO_PlayerAttribute", "")..(nameSuffix or "")
-		local c = WINDOW_MANAGER:CreateControlFromVirtual(name, parent, template)
-		return c, c
-	end
-
-	local function SetColors(self)
-		local powerType = self.powerType
-		local gradient = ZO_POWER_BAR_GRADIENT_COLORS[powerType]
-		for i, control in ipairs(self.barControls) do
-			ZO_StatusBar_SetGradientColor(control, gradient)
-			control:SetFadeOutLossColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_FADE_OUT, powerType))
-			control:SetFadeOutGainColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_FADE_IN, powerType))
-   		end
-   	end	
 
 	---------------
 	-- TOP LAYER --
@@ -556,13 +616,92 @@ local function CreateControls()
 		window[1]:SetAnchor(TOP, base, TOP, 0, 18)
 		window[2]:SetAnchor(TOP, window[1], BOTTOM, 0, 2)
 	else
+		local CHILD_DIRECTIONS = { "Left", "Right", "Center" }
+
+
+		local function SetColors(self)
+			local powerType = self.powerType
+			local gradient = ZO_POWER_BAR_GRADIENT_COLORS[powerType]
+			for i, control in ipairs(self.barControls) do
+				ZO_StatusBar_SetGradientColor(control, gradient)
+				control:SetFadeOutLossColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_FADE_OUT, powerType))
+				control:SetFadeOutGainColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_POWER_FADE_IN, powerType))
+			end
+		end	
+
+		local PAB_TEMPLATES = {
+		    [POWERTYPE_HEALTH] = {
+		        background = {
+		            Left = "ZO_PlayerAttributeBgLeftArrow",
+		            Right = "ZO_PlayerAttributeBgRightArrow",
+		            Center = "ZO_PlayerAttributeBgCenter",
+		        },
+		        frame = {
+		            Left = "ZO_PlayerAttributeFrameLeftArrow",
+		            Right = "ZO_PlayerAttributeFrameRightArrow",
+		            Center = "ZO_PlayerAttributeFrameCenter",
+		        },
+		        warner = {
+		            texture = "ZO_PlayerAttributeHealthWarnerTexture",
+		            Left = "ZO_PlayerAttributeWarnerLeftArrow",
+		            Right = "ZO_PlayerAttributeWarnerRightArrow",
+		            Center = "ZO_PlayerAttributeWarnerCenter",
+		        },
+		        anchors = {
+		            "ZO_PlayerAttributeHealthBarAnchorLeft",
+		            "ZO_PlayerAttributeHealthBarAnchorRight",
+		        },
+		    },
+		    statusBar = "ZO_PlayerAttributeStatusBar",
+    		statusBarGloss = "ZO_PlayerAttributeStatusBarGloss",
+    		resourceNumbersLabel = "ZO_PlayerAttributeResourceNumbers",
+		}
+
+		local function ApplyStyle(bar)
+		    local powerTypeTemplates = PAB_TEMPLATES[bar.powerType]
+	        local backgroundTemplates = powerTypeTemplates.background
+	        local frameTemplates = powerTypeTemplates.frame
+
+	        local warnerControl = bar:GetNamedChild("Warner")
+	        local bgControl = bar:GetNamedChild("BgContainer")
+
+	        local warnerTemplates = powerTypeTemplates.warner
+
+            for _, direction in pairs(CHILD_DIRECTIONS) do
+                local bgChild = bgControl:GetNamedChild("Bg" .. direction)
+                ApplyTemplateToControl(bgChild, ZO_GetPlatformTemplate(backgroundTemplates[direction]))
+
+                local frameControl = bar:GetNamedChild("Frame" .. direction)
+                ApplyTemplateToControl(frameControl, ZO_GetPlatformTemplate(frameTemplates[direction]))
+
+                local warnerChild = warnerControl:GetNamedChild(direction)
+                ApplyTemplateToControl(warnerChild, ZO_GetPlatformTemplate(warnerTemplates.texture))
+                ApplyTemplateToControl(warnerChild, ZO_GetPlatformTemplate(warnerTemplates[direction]))
+            end
+
+            for i, subBar in pairs(bar.barControls) do
+                ApplyTemplateToControl(subBar, ZO_GetPlatformTemplate(PAB_TEMPLATES.statusBar))
+
+                local gloss = subBar:GetNamedChild("Gloss")
+                ApplyTemplateToControl(gloss, ZO_GetPlatformTemplate(PAB_TEMPLATES.statusBarGloss))
+
+                local anchorTemplates = powerTypeTemplates.anchors
+                if anchorTemplates then
+                    subBar:ClearAnchors()
+                    ApplyTemplateToControl(subBar, ZO_GetPlatformTemplate(anchorTemplates[i]))
+                else
+                    ApplyTemplateToControl(subBar, ZO_GetPlatformTemplate(PAB_TEMPLATES.anchor))
+                end
+            end
+	       
+	        local resourceNumbersLabel = bar:GetNamedChild("ResourceNumbers")
+	        if resourceNumbersLabel then
+	            ApplyTemplateToControl(resourceNumbersLabel, ZO_GetPlatformTemplate(PAB_TEMPLATES.resourceNumbersLabel))
+	        end
+		end
+		
 		for i=1,2 do
-			SetVirtualControlIndex(i)
-			window[i], ctrl = AddControlFromVirtual(base, "ZO_PlayerAttributeContainer")
-			window[i].bgcontainer, ctrl = AddControlFromVirtual(window[i], "ZO_PlayerAttributeBgContainer")
-			window[i].bgcontainer.left, ctrl = AddControlFromVirtual(window[i].bgcontainer, "ZO_PlayerAttributeBgLeftArrow")
-			window[i].bgcontainer.right, ctrl = AddControlFromVirtual(window[i].bgcontainer, "ZO_PlayerAttributeBgRightArrow")
-			window[i].bgcontainer.center, ctrl = AddControlFromVirtual(window[i].bgcontainer, "ZO_PlayerAttributeBgCenter")
+			window[i] = WINDOW_MANAGER:CreateControlFromVirtual("PetHealth"..i, base, "PetHealth_ZOSStyleBar")
 
 			-- label
 			local windowHeight = window[i]:GetHeight()
@@ -574,49 +713,25 @@ local function CreateControls()
 			ctrl:SetAlpha(GetAlphaFromControl(savedVars.showLabels))
 
 			-- bars
-			window[i].barleft, ctrl = AddControlFromVirtual(window[i], "ZO_PlayerAttributeStatusBar", "Left")	
-			ctrl:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
-			ctrl:SetAnchor(LEFT)
-			ctrl:SetAnchor(RIGHT, window[i], CENTER)
-			window[i].barleft.gloss, ctrl = AddControlFromVirtual(window[i].barleft, "ZO_PlayerAttributeStatusBarGloss", "Left")
-			ctrl:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
-			window[i].barright, ctrl = AddControlFromVirtual(window[i], "ZO_PlayerAttributeStatusBar", "Right")
-			ctrl:SetAnchor(RIGHT)
-			ctrl:SetAnchor(LEFT, window[i], CENTER)
-			window[i].barright.gloss, ctrl = AddControlFromVirtual(window[i].barright, "ZO_PlayerAttributeStatusBarGloss", "Right")
-			window[i].frameleft, ctrl = AddControlFromVirtual(window[i], "ZO_PlayerAttributeFrameLeftArrow")
-			window[i].frameright, ctrl = AddControlFromVirtual(window[i], "ZO_PlayerAttributeFrameRightArrow")
-			window[i].framecenter, ctrl = AddControlFromVirtual(window[i], "ZO_PlayerAttributeFrameCenter")
-
+			window[i].barleft = window[i]:GetNamedChild("BarLeft")
+			window[i].barright = window[i]:GetNamedChild("BarRight")
+			
 			window[i].barControls = { window[i].barleft, window[i].barright }
 			window[i].powerType = POWERTYPE_HEALTH
 
 			SetColors(window[i])
+			ApplyStyle(window[i])
 
 			-- shield
-			window[i].shieldleft, ctrl = AddControlFromVirtual(window[i], "ZO_PlayerAttributeStatusBar", "LeftShield")
-			ctrl:SetDrawLevel(900)
-			ctrl:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
-			ctrl:SetAnchor(LEFT)
-			ctrl:SetAnchor(RIGHT, window[i], CENTER)
-			window[i].shieldleft.gloss = AddControlFromVirtual(window[i].shieldleft, "ZO_PlayerAttributeStatusBarGloss", "LeftShield")
-			ctrl:SetBarAlignment(BAR_ALIGNMENT_REVERSE)
-			window[i].shieldright, ctrl = AddControlFromVirtual(window[i], "ZO_PlayerAttributeStatusBar", "RightShield")
-			ctrl:SetDrawLevel(900)
-			ctrl:SetAnchor(RIGHT)
-			ctrl:SetAnchor(LEFT, window[i], CENTER)
-			window[i].shieldright.gloss = AddControlFromVirtual(window[i].shieldright, "ZO_PlayerAttributeStatusBarGloss", "RightShield")
-
-			-- values
-			window[i].values, ctrl = AddControl(window[i].framecenter, CT_LABEL, 50)
-			ctrl:SetFont("$(BOLD_FONT)|$(KB_14)|soft-shadow-thin")
-			ctrl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
-			ctrl:SetAnchor(CENTER, window[i].framecenter)
-			ctrl:SetAlpha(GetAlphaFromControl(savedVars.showValues))
-			-- ctrl:SetHidden(not savedVars.showValues or false)
+			window[i].shieldleft = window[i]:GetNamedChild("ShieldLeft")
+			window[i].shieldright = window[i]:GetNamedChild("ShieldRight")
 			
-			-- clear anchors to reset it
-			window[i]:ClearAnchors()
+			-- values
+			window[i].values = window[i]:GetNamedChild("ResourceNumbers")
+			window[i].values:SetAlpha(GetAlphaFromControl(savedVars.showValues))
+			-- ctrl:SetHidden(not savedVars.showValues or false)
+
+			window[i].warner = PetHealthWarner:New(window[i]);
 		end
 
 		window[1]:SetAnchor(TOP, base, TOP, 0, 18)
@@ -902,6 +1017,7 @@ local function OnAddOnLoaded(_, addonName)
 		
 	-- end
 	-- create ui
+	CreateWarner()
 	CreateControls()
 	-- do stuff
 	--GetActivePets()
