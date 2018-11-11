@@ -435,6 +435,9 @@ local function CreateWarner()
 	if savedVars.useZosStyle then
 		local HEALTH_ALPHA_PULSE_THRESHOLD = 0.25
 
+		local RESOURCE_WARNER_FLASH_TIME  = 300
+		local RESOURCE_WARNER_NUM_FLASHES = 3
+		
 		PetHealthWarner = ZO_Object:Subclass()
 
 		function PetHealthWarner:New(...)
