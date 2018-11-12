@@ -351,10 +351,11 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 	window[i].values:SetText(ZO_FormatResourceBarCurrentAndMax(powerValue, powerMax))
 	-- health bar
 	if (savedVars.useZosStyle) then
-		powerValue = powerValue / 2
-		powerMax = powerMax / 2
-		ZO_StatusBar_SmoothTransition(window[i].barleft, powerValue, powerMax, (initial == "true" and true or false))
-		ZO_StatusBar_SmoothTransition(window[i].barright, powerValue, powerMax, (initial == "true" and true or false))
+		local halfValue = powerValue / 2
+		local halfMax = powerMax / 2
+		ZO_StatusBar_SmoothTransition(window[i].barleft, halfValue, halfMax, (initial == "true" and true or false))
+		ZO_StatusBar_SmoothTransition(window[i].barright, halfValue, halfMax, (initial == "true" and true or false))
+		window[i].warner:OnHealthUpdate(powerValue, powerMax);
 	else
 		ZO_StatusBar_SmoothTransition(window[i].healthbar, powerValue, powerMax, (initial == "true" and true or false))
 	end
@@ -369,8 +370,6 @@ end
 -----------
 -- STATS --
 -----------
-local RefreshWarnerEvents
-
 local function GetControlText(control)
 	local controlText = control:GetText()
 	if controlText ~= nil then return controlText end
@@ -387,9 +386,6 @@ local function UpdatePetStats(unitTag)
 	local control = window[i].label
 	if GetControlText(control) ~= name then
 		window[i].label:SetText(name)
-		if (savedVars.useZosStyle) then
-			RefreshWarnerEvents(window[i], unitTag)
-		end
 	end
 	GetHealth(unitTag)
 	GetShield(unitTag)
@@ -497,14 +493,6 @@ local function CreateWarner()
 				local healthPerc = health / maxHealth
 				self:UpdateAlphaPulse(healthPerc)
 			end
-		end
-
-		RefreshWarnerEvents = function(window, unitTag)
-			local warner = window.warner;
-			warner.unitTag = unitTag;
-			warner.warning:UnregisterForEvent(EVENT_POWER_UPDATE)
-			warner.warning:RegisterForEvent(EVENT_POWER_UPDATE, warner.OnPowerUpdate)
-			warner.warning:AddFilterForEvent(EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, POWERTYPE_HEALTH, REGISTER_FILTER_UNIT_TAG, unitTag);
 		end
 	end
 end
