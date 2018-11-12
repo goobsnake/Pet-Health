@@ -284,7 +284,7 @@ local function OnShieldUpdate(handler, unitTag, value, maxValue, initial)
 			value = value / 2;
 			maxValue = maxValue / 2;
 			ZO_StatusBar_SmoothTransition(window[i].shieldleft, value, maxValue, (initial == "true" and true or false))
-			ZO_StatusBar_SmoothTransition(window[i].shieldRight, value, maxValue, (initial == "true" and true or false))
+			ZO_StatusBar_SmoothTransition(window[i].shieldright, value, maxValue, (initial == "true" and true or false))
 		else
 			ZO_StatusBar_SmoothTransition(window[i].shield, value, maxValue, (initial == "true" and true or false))
 		end
