@@ -50,6 +50,8 @@ local strings = {
 	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_TT = "Дополнение отображает панель здоровья питомца только в бою.",
 	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH	= "Порог отображения панели здоровья в бою",
 	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH_TT = "Дополнение отображает панель здоровья питомца при значениях ниже или равном указанному.",
+	SI_PET_HEALTH_LAM_USE_ZOS_STYLE = "Использовать ZOS-Style",
+	SI_PET_HEALTH_LAM_USE_ZOS_STYLE_TT = "Use the arrow status bars instead of the rectanguler ones",
 }
  for stringId, stringValue in pairs(strings) do
    ZO_CreateStringId(stringId, stringValue)
