@@ -9,7 +9,7 @@ PetHealth.supportedClasses = {
 local addon = {
 	name 			= "PetHealth",
 	displayName 	= "PetHealth",
-	version         = "1.03",
+	version         = "1.04",
 	savedVarName	= "PetHealth_Save",
 	savedVarVersion = 2,
 	lamDisplayName 	= "PetHealth",
@@ -121,7 +121,7 @@ local validPets = {
 	["сумрак-мучитель"] = true, -- ru
 	-- Twilight Matriarch
 	[GetPetNameLower(30629)] = true,
-	"сумрак-матриарх"] = true, -- ru
+	["сумрак-матриарх"] = true, -- ru
 	-- Feral Guardian
 	[GetPetNameLower(94376)] = true,
 	["дикий страж"] = true, -- ru
