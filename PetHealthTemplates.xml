@@ -1,0 +1,61 @@
+<GuiXml>
+	<Controls>
+		<Control name="PetHealth_ZOSStyleBar" virtual="true" inherits="ZO_PlayerAttributeContainer">
+            <Anchor point="CENTER"/>
+            <Controls>
+                <Control name="$(parent)BgContainer" inherits="ZO_PlayerAttributeBgContainer">
+                    <Anchor point="CENTER" />
+                    <Controls>
+                        <Texture name="$(parent)BgLeft" inherits="ZO_PlayerAttributeBgLeftArrow" />
+                        <Texture name="$(parent)BgRight" inherits="ZO_PlayerAttributeBgRightArrow" />
+                        <Texture name="$(parent)BgCenter" inherits="ZO_PlayerAttributeBgCenter" />
+                    </Controls>
+                </Control>
+                
+                <StatusBar name="$(parent)BarLeft" inherits="ZO_PlayerAttributeStatusBar" barAlignment="REVERSE">
+                    <Anchor point="LEFT" />
+                    <Anchor point="RIGHT" relativePoint="CENTER" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" barAlignment="REVERSE" />
+                    </Controls>
+                </StatusBar>
+                <StatusBar name="$(parent)BarRight" inherits="ZO_PlayerAttributeStatusBar">
+                    <Anchor point="RIGHT" />
+                    <Anchor point="LEFT" relativePoint="CENTER" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" />
+                    </Controls>
+                </StatusBar>
+
+                <Texture name="$(parent)FrameLeft" inherits="ZO_PlayerAttributeFrameLeftArrow" />
+                <Texture name="$(parent)FrameRight" inherits="ZO_PlayerAttributeFrameRightArrow" />
+                <Texture name="$(parent)FrameCenter" inherits="ZO_PlayerAttributeFrameCenter" />
+
+                <Control name="$(parent)Warner" inherits="ZO_PlayerAttributeWarner">
+                    <Controls>
+                        <Texture name="$(parent)Left" inherits="ZO_PlayerAttributeWarnerLeftArrow" />
+                        <Texture name="$(parent)Right" inherits="ZO_PlayerAttributeWarnerRightArrow" />
+                        <Texture name="$(parent)Center" inherits="ZO_PlayerAttributeWarnerCenter" />
+                    </Controls>
+                </Control>
+
+        		<StatusBar name="$(parent)ShieldLeft" level="40" inherits="ZO_PlayerAttributeStatusBar" barAlignment="REVERSE">
+                    <Anchor point="LEFT" />
+                    <Anchor point="RIGHT" relativePoint="CENTER" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" barAlignment="REVERSE" />
+                    </Controls>
+                </StatusBar>
+                <StatusBar name="$(parent)ShieldRight" level="40" inherits="ZO_PlayerAttributeStatusBar">
+                    <Anchor point="RIGHT" />
+                    <Anchor point="LEFT" relativePoint="CENTER" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" />
+                    </Controls>
+	            </StatusBar>
+
+                <Label name="$(parent)ResourceNumbers" inherits="ZO_PlayerAttributeBarText" />
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>
