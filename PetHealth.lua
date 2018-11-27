@@ -105,23 +105,31 @@ local validPets = {
 	["clannfear"] = true, -- en
 	["clannbann"] = true, -- de
 	["faucheclan"] = true, -- fr
+	["кланфир"] = true, -- ru
 	-- Volatile Familiar
 	[GetPetNameLower(30678)] = true, -- en/de
+	["взрывной прислужник"] = true, -- ru
 	-- Winged Twilight
 	[GetPetNameLower(30589)] = true,
 	["familier explosif"] = true, -- fr
+	["крылатый сумрак"] = true, -- ru
 	-- Twilight Tormentor
 	[GetPetNameLower(30594)] = true, -- en
 	["zwielichtpeinigerin"] = true, -- de
 	["tourmenteur crépusculaire"] = true, -- fr
+	["сумрак-мучитель"] = true, -- ru
 	-- Twilight Matriarch
 	[GetPetNameLower(30629)] = true,
+	["сумрак-матриарх"] = true, -- ru
 	-- Feral Guardian
 	[GetPetNameLower(94376)] = true,
+	["дикий страж"] = true, -- ru
 	-- Eternal Guardian
 	[GetPetNameLower(94394)] = true,
+	["вечный защитник"] = true, -- ru
 	-- Wild Guardian
 	[GetPetNameLower(94408)] = true,
+	["дикий защитник"] = true, -- ru
 }
 
 local function IsUnitValidPet(unitTag)
