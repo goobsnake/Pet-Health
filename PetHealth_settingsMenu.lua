@@ -22,7 +22,7 @@ function PetHealth.buildLAMAddonMenu()
 
     local savedVariablesOptions = {
         [1] = GetString(SI_PET_HEALTH_EACH_CHAR),
-      -- [2] = GetString(SI_PET_HEALTH_ACCOUNT_WIDE),
+        [2] = GetString(SI_PET_HEALTH_ACCOUNT_WIDE),
     }
     --Register the LAM panel and add it to the global PetHealth table
     PetHealth.LAM_SettingsPanel = PetHealth.LAM:RegisterAddonPanel(addonVars.name .. "_LAM", panelData)
@@ -39,11 +39,11 @@ function PetHealth.buildLAMAddonMenu()
             name = GetString(SI_PET_HEALTH_SAVE_TYPE),
             tooltip = GetString(SI_PET_HEALTH_SAVE_TYPE_TT),
             choices = savedVariablesOptions,
-            getFunc = function() return savedVariablesOptions[settings.saveMode] end,
+            getFunc = function() return savedVariablesOptions[PetHealth_Save[GetWorldName()][GetDisplayName()]['$AccountWide']["saveMode"]] end,
             setFunc = function(value)
                 for i,v in pairs(savedVariablesOptions) do
                     if v == value then
-                        settings.saveMode = i
+                        PetHealth_Save[GetWorldName()][GetDisplayName()]['$AccountWide']["saveMode"] = i
                     end
                 end
             end,

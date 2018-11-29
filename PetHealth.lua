@@ -19,7 +19,7 @@ local addon = {
 PetHealth.addonData = addon
 
 local default = {
-	saveMode = 1, -- Each character
+	saveMode = 1, -- Default for each character setting
 	point = TOPLEFT,
 	relPoint = CENTER,
 	x = 0,
@@ -859,8 +859,6 @@ function PetHealth.onlyInCombatHealthPercentage(toValue)
 	onlyInCombatHealthPercentage = toValue
 end
 
-
-
 local function SlashCommands()
 
 	-- LSC:Register("/pethealthdebug", function()
@@ -972,9 +970,12 @@ end
 local function OnAddOnLoaded(_, addonName)
 	if addonName ~= addon.name then return end
 	EVENT_MANAGER:UnregisterForEvent(addon.name, EVENT_ADD_ON_LOADED)
-		
-	-- savedVars
-	savedVars = ZO_SavedVars:NewCharacterIdSettings(addon.savedVarName, addon.savedVarVersion, nil, default, GetWorldName())
+	
+	savedVars = ZO_SavedVars:NewAccountWide(addon.savedVarName, addon.savedVarVersion, nil, default, GetWorldName())
+	if savedVars.saveMode == 1 then
+		savedVars = ZO_SavedVars:NewCharacterIdSettings(addon.savedVarName, addon.savedVarVersion, nil, default, GetWorldName()) 
+	end
+
 	--savedVarCopy = savedVars -- during playing, it takes only the local savedVars settings instead picking the savedVars
 	PetHealth.savedVars = savedVars
 	PetHealth.savedVarsDefault = default
@@ -1011,10 +1012,6 @@ local function OnAddOnLoaded(_, addonName)
 		end
 	end
 
-	-- local LAM = LibStub("LibAddonMenu-2.0")
-	-- if LAM ~= nil then
-		
-	-- end
 	-- create ui
 	CreateWarner()
 	CreateControls()
