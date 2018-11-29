@@ -63,6 +63,7 @@ function PetHealth.buildLAMAddonMenu()
                 PetHealth.changeBackground(value)
             end,
             default = defaults.showBackground,
+            disabled = function() return settings.useZosStyle end,
             width="full",
         },
         {
@@ -103,7 +104,15 @@ function PetHealth.buildLAMAddonMenu()
             name = GetString(SI_PET_HEALTH_LAM_USE_ZOS_STYLE),
             tooltip = GetString(SI_PET_HEALTH_LAM_USE_ZOS_STYLE_TT),
             getFunc = function() return settings.useZosStyle end,
-            setFunc = function(value) settings.useZosStyle = value end,
+            setFunc = function(value) settings.useZosStyle = value
+                if value == true then
+                    settings.showBackground = false
+                    PetHealth.changeBackground(false)
+                else
+                    settings.showBackground = true
+                    PetHealth.changeBackground(true)
+                end
+            end,
             width = "full",
             requiresReload = true,
         },

@@ -708,7 +708,7 @@ local function CreateControls()
 			ctrl:SetFont("$(BOLD_FONT)|$(KB_16)|soft-shadow-thin")
 			ctrl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
 			ctrl:SetDimensions(baseWidth, windowHeight*0.4)
-			ctrl:SetAnchor(BOTTOMLEFT, window[i], TOPLEFT, 0, -12)
+			ctrl:SetAnchor(BOTTOMLEFT, window[i], TOPLEFT, 0, -10.5)
 			ctrl:SetAlpha(GetAlphaFromControl(savedVars.showLabels))
 
 			-- bars
