@@ -9,12 +9,12 @@ PetHealth.supportedClasses = {
 local addon = {
 	name 			= "PetHealth",
 	displayName 	= "PetHealth",
-	version         = "1.04",
+	version         = "1.05",
 	savedVarName	= "PetHealth_Save",
 	savedVarVersion = 2,
 	lamDisplayName 	= "PetHealth",
 	lamAuthor		= "Scootworks, Goobsnake",
-	lamUrl			= "https://www.esoui.com/downloads/info1884-PetHealthMurkmire.html",
+	lamUrl			= "https://www.esoui.com/downloads/info1884-PetHealth.html",
 }
 PetHealth.addonData = addon
 
@@ -80,8 +80,8 @@ end
 
 local function CheckAddon(addon)
 	for i = 1, AddOnManager:GetNumAddOns() do
-		local name, title, author, description, enabled, state, isOutOfDate = AddOnManager:GetAddOnInfo(i)          
-		if title == addon and enabled == true then
+		local name, title, author, description, enabled, state, isOutOfDate = AddOnManager:GetAddOnInfo(i)   
+		if title == addon and enabled == true and state == 2 then
 			return true
 		end
 	end
