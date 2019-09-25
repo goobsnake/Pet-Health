@@ -9,7 +9,7 @@ PetHealth.supportedClasses = {
 local addon = {
 	name 			= "PetHealth",
 	displayName 	= "PetHealth",
-	version         = "1.05",
+	version         = "1.06",
 	savedVarName	= "PetHealth_Save",
 	savedVarVersion = 2,
 	lamDisplayName 	= "PetHealth",
@@ -412,7 +412,7 @@ local function GetActivePets()
 		local unitTag = UNIT_PLAYER_PET..i		
 		if IsUnitValidPet(unitTag) then
 			table.insert(currentPets, { unitTag = unitTag, unitName = GetUnitName(unitTag) })
-			zo_callLater(function() UpdatePetStats(unitTag) end, 50)
+			zo_callLater(function() UpdatePetStats(unitTag) end, 500)
 		end
 	end
 	-- update
