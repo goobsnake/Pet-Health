@@ -3,13 +3,13 @@
 ## APIVersion: 100028 100029
 ## Author: Scootworks & Goobsnake
 ## Contributors: Baertram, chaoticvoid & SheogorathGR
-## AddOnVersion: 1.06
-## Version: 1.06
+## AddOnVersion: 1.07
+## Version: 1.07
 ## SavedVariables: PetHealth_Save
-## OptionalDependsOn: LibStub LibSlashCommander LibAddonMenu-2.0
+## OptionalDependsOn: LibSlashCommander LibAddonMenu-2.0
 
 ##Libraries:
-##LibStub LibAddonMenu-2.0 and LibSlashCommander need to be installed as standalone versions in order to change default settings!
+##LibAddonMenu-2.0 and LibSlashCommander need to be installed as standalone versions in order to change default settings!
 
 lang/en.lua
 lang/$(language).lua
