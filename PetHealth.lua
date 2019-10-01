@@ -9,7 +9,7 @@ PetHealth.supportedClasses = {
 local addon = {
 	name 			= "PetHealth",
 	displayName 	= "PetHealth",
-	version         = "1.06",
+	version         = "1.07",
 	savedVarName	= "PetHealth_Save",
 	savedVarVersion = 2,
 	lamDisplayName 	= "PetHealth",
@@ -27,6 +27,7 @@ local default = {
 	onlyInCombat = false,
 	showValues = true,
 	showLabels = true,
+	lockWindow = false,
 	lowHealthAlertSlider = 0,
 	lowShieldAlertSlider = 0,
 	petUnsummonedAlerts = false,
@@ -46,6 +47,7 @@ local inCombatAddon = false
 
 local AddOnManager = GetAddOnManager()
 local LSC
+local lockWindow = false
 local lowHealthAlertPercentage = 0
 local lowShieldAlertPercentage = 0
 local onlyInCombatHealthMax = 0
@@ -526,7 +528,11 @@ local function CreateControls()
 	base:SetDimensions(WINDOW_WIDTH, WINDOW_HEIGHT_TWO)
 	base:SetAnchor(savedVars.point, GuiRoot, savedVars.relPoint, savedVars.x, savedVars.y)
 	base:SetMouseEnabled(true)
-	base:SetMovable(true)
+	if lockWindow then
+		base:SetMovable(false)
+	else
+		base:SetMovable(true)
+	end
 	base:SetDrawLayer(DL_OVERLAY)
 	base:SetDrawLevel(0)
 	base:SetHandler("OnMouseUp", function()
@@ -841,6 +847,10 @@ function PetHealth.changeLabels(toValue)
 	for i=1,2 do
 		window[i].label:SetAlpha(GetAlphaFromControl(toValue))
 	end
+end
+
+function PetHealth.lockWindow(toValue)
+	lockWindow = toValue
 end
 
 function PetHealth.lowHealthAlertPercentage(toValue)

@@ -186,6 +186,17 @@ function PetHealth.buildLAMAddonMenu()
             width = "full",
             default = defaults.onlyInCombatHealthSlider,
         },
+        {
+            type = "checkbox",
+            name = GetString(SI_PET_HEALTH_LOCK_WINDOW),
+            tooltip = GetString(SI_PET_HEALTH_LOCK_WINDOW_TT),
+            getFunc = function() return settings.lockWindow end,
+            setFunc = function(value) settings.lockWindow = value
+                PetHealth.lockWindow(value)
+            end,
+            default = defaults.lockWindow,
+            width="full",
+        },
     } -- optionsTable
     -- END OF OPTIONS TABLE
 

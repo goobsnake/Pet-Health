@@ -41,6 +41,8 @@ local strings = {
 	SI_PET_HEALTH_LAM_VALUES_TT = 'Переключение состояния отображения значения зоровья питомца.\nЗначения отображаются согласно оригинальным настройкам игры!',
 	SI_PET_HEALTH_LAM_UNSUMMONED_ALERT = 'Оповещение состояния питомца',
 	SI_PET_HEALTH_LAM_UNSUMMONED_ALERT_TT = 'Дополнение оповещает о смерти вашего питомца, а так же об изменении его показателей.',
+	SI_PET_HEALTH_LAM_LOCK_WINDOW		= 'Блокировка положения окна',
+	SI_PET_HEALTH_LAM_LOCK_WINDOW_TT	= 'Блокирует окно здоровья питомца в его текущем положении',
 	SI_PET_HEALTH_LAM_LOW_HEALTH_WARN	= "Порог оповещения о низком здоровье питомца",
 	SI_PET_HEALTH_LAM_LOW_HEALTH_WARN_TT= "Дополнение оповещает что здоровье питомца упало ниже установленного значения.",
 	SI_PET_HEALTH_LAM_LOW_SHIELD_WARN	= "Порог оповещения о низком значении щита",
@@ -53,7 +55,8 @@ local strings = {
 	SI_PET_HEALTH_LAM_USE_ZOS_STYLE = "Использовать ZOS-Style",
 	SI_PET_HEALTH_LAM_USE_ZOS_STYLE_TT = "Use the arrow status bars instead of the rectanguler ones",
 }
- for stringId, stringValue in pairs(strings) do
+
+for stringId, stringValue in pairs(strings) do
    ZO_CreateStringId(stringId, stringValue)
    SafeAddVersion(stringId, 1)
 end
