@@ -528,7 +528,7 @@ local function CreateControls()
 	base:SetDimensions(WINDOW_WIDTH, WINDOW_HEIGHT_TWO)
 	base:SetAnchor(savedVars.point, GuiRoot, savedVars.relPoint, savedVars.x, savedVars.y)
 	base:SetMouseEnabled(true)
-	if lockWindow then
+	if savedVars.lockWindow == true then
 		base:SetMovable(false)
 	else
 		base:SetMovable(true)
@@ -849,7 +849,7 @@ function PetHealth.changeLabels(toValue)
 	end
 end
 
-function PetHealth.lockWindow(toValue)
+function PetHealth.lockPetWindow(toValue)
 	lockWindow = toValue
 end
 
@@ -1006,33 +1006,20 @@ local function OnAddOnLoaded(_, addonName)
 	
 	--Makes libs completely optional
 	--If users want to change default values or expanded funcitonality, they will need to install applicable libs
-	if LibAddonMenu2 then
+	local isLAMActive = CheckAddon('LibAddonMenu-2.0')
+	local isLSCActive = CheckAddon('LibSlashCommander')
+	
+	if isLAMActive then
     --Build the LAM addon menu if the library LibAddonMenu-2.0 was found loaded properly
-		PetHealth.LAM = LibAddonMenu2
-	end
-
-	if LibSlashCommander then
-   	--Build the slash commands if the library LibSlashCommander was found loaded properly
-		LSC = LibSlashCommander
-	end
-
-	if LibStub then
-		if PetHealth.LAM == nil then
-			PetHealth.LAM = LibStub("LibAddonMenu-2.0")
-		end
-
-		if LSC == nil then
-			LSC = LibStub("LibSlashCommander")
-		end
-	end
-
-	if PetHealth.LAM ~= nil then
+    	PetHealth.LAM = LibStub("LibAddonMenu-2.0")
 		PetHealth.buildLAMAddonMenu()
 	end
 
-	if LSC ~= nil then
- 		SlashCommands()
- 	end
+	if isLSCActive then
+   	--Build the slash commands if the library LibSlashCommander was found loaded properly
+   		LSC = LibStub("LibSlashCommander")
+		SlashCommands()
+	end
 
 	-- create ui
 	CreateWarner()

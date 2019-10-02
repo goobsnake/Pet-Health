@@ -56,6 +56,18 @@ function PetHealth.buildLAMAddonMenu()
         },
         {
             type = "checkbox",
+            name = GetString(SI_PET_HEALTH_LAM_LOCK_WINDOW),
+            tooltip = GetString(SI_PET_HEALTH_LAM_LOCK_WINDOW_TT),
+            getFunc = function() return settings.lockWindow end,
+            setFunc = function(value) settings.lockWindow = value
+                PetHealth.lockPetWindow(value)
+            end,
+            default = defaults.lockWindow,
+            width="full",
+            requiresReload = true,
+        },
+        {
+            type = "checkbox",
             name = GetString(SI_PET_HEALTH_LAM_BACKGROUND),
             tooltip = GetString(SI_PET_HEALTH_LAM_BACKGROUND_TT),
             getFunc = function() return settings.showBackground end,
@@ -185,17 +197,6 @@ function PetHealth.buildLAMAddonMenu()
             inputLocation = "right",
             width = "full",
             default = defaults.onlyInCombatHealthSlider,
-        },
-        {
-            type = "checkbox",
-            name = GetString(SI_PET_HEALTH_LOCK_WINDOW),
-            tooltip = GetString(SI_PET_HEALTH_LOCK_WINDOW_TT),
-            getFunc = function() return settings.lockWindow end,
-            setFunc = function(value) settings.lockWindow = value
-                PetHealth.lockWindow(value)
-            end,
-            default = defaults.lockWindow,
-            width="full",
         },
     } -- optionsTable
     -- END OF OPTIONS TABLE
