@@ -1017,8 +1017,8 @@ local function OnAddOnLoaded(_, addonName)
 
 	if isLSCActive then
    	--Build the slash commands if the library LibSlashCommander was found loaded properly
-   		LSC = LibStub("LibSlashCommander")
-		SlashCommands()
+   		--LSC = LibStub("LibSlashCommander")
+		--SlashCommands()
 	end
 
 	-- create ui
