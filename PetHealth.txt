@@ -3,8 +3,8 @@
 ## APIVersion: 100029 100030 100031
 ## Author: Scootworks & Goobsnake
 ## Contributors: Baertram, chaoticvoid & SheogorathGR
-## AddOnVersion: 1.08
-## Version: 1.08
+## AddOnVersion: 1.09
+## Version: 1.09
 ## SavedVariables: PetHealth_Save
 ## OptionalDependsOn: LibSlashCommander LibAddonMenu-2.0
 

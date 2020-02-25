@@ -9,7 +9,7 @@ PetHealth.supportedClasses = {
 local addon = {
 	name 			= "PetHealth",
 	displayName 	= "PetHealth",
-	version         = "1.08",
+	version         = "1.09",
 	savedVarName	= "PetHealth_Save",
 	savedVarVersion = 2,
 	lamDisplayName 	= "PetHealth",
@@ -94,7 +94,16 @@ local function GetPetNameLower(abilityId)
 	Um die Namen einfacher zu vergleichen, nur Kleinbuchstaben nutzen.
 	Zudem formatiert zo_strformat() den Namen ins richtige Format.
 	]]
-	return zo_strformat("<<z:1>>", GetAbilityName(abilityId))
+	local abilityName = GetAbilityName(abilityId)
+	local petName
+	--Removing text from Sorc pet ability names to derive pet names / Not currently needed for Warden pets
+	--Unstable Clannfear is abilityId 23319
+	if abilityId == 23319 or abilityId == 23304 then
+		petName = abilityName:gsub("Summon Unstable ","")
+	else
+		petName = abilityName:gsub("Summon ","")
+	end
+	return zo_strformat("<<z:1>>", petName)
 end
 
 local validPets = {
@@ -103,35 +112,35 @@ local validPets = {
 	müssen wir hier ein paar Sachen hardcoden.
 	]]
 	-- Familiar
-	[GetPetNameLower(18602)] = true,
+	[GetPetNameLower(23304)] = true,
 	-- Clannfear
-	["clannfear"] = true, -- en
+	[GetPetNameLower(23319)] = true,
 	["clannbann"] = true, -- de
 	["faucheclan"] = true, -- fr
 	["кланфир"] = true, -- ru
 	-- Volatile Familiar
-	[GetPetNameLower(30678)] = true, -- en/de
+	[GetPetNameLower(23316)] = true, -- en/de
 	["взрывной прислужник"] = true, -- ru
 	-- Winged Twilight
-	[GetPetNameLower(30589)] = true,
+	[GetPetNameLower(24613)] = true, -- en
 	["familier explosif"] = true, -- fr
 	["крылатый сумрак"] = true, -- ru
 	-- Twilight Tormentor
-	[GetPetNameLower(30594)] = true, -- en
+	[GetPetNameLower(24636)] = true, -- en
 	["zwielichtpeinigerin"] = true, -- de
 	["tourmenteur crépusculaire"] = true, -- fr
 	["сумрак-мучитель"] = true, -- ru
 	-- Twilight Matriarch
-	[GetPetNameLower(30629)] = true,
+	[GetPetNameLower(24639)] = true,
 	["сумрак-матриарх"] = true, -- ru
 	-- Feral Guardian
-	[GetPetNameLower(94376)] = true,
+	[GetPetNameLower(85982)] = true,
 	["дикий страж"] = true, -- ru
 	-- Eternal Guardian
-	[GetPetNameLower(94394)] = true,
+	[GetPetNameLower(85986)] = true,
 	["вечный защитник"] = true, -- ru
 	-- Wild Guardian
-	[GetPetNameLower(94408)] = true,
+	[GetPetNameLower(85990)] = true,
 	["дикий защитник"] = true, -- ru
 }
 
@@ -189,6 +198,11 @@ local function PetUnSummonedAlerts(unitTag)
 end
 
 local function RefreshPetWindow()
+	-- GetSlotBoundId values 3 thru 8 to obtain the slotbar's abiltiyId's (8 is ultimate)
+	--d(GetSlotBoundId(3))
+	--d(GetPetNameLower(GetSlotBoundId(3)))
+	--d(GetAbilityName(23319))
+
 	local countPets = #currentPets
 	local combatState = GetCombatState()
 	if PET_BAR_FRAGMENT:IsHidden() and countPets == 0 and combatState then
@@ -411,7 +425,7 @@ local function GetActivePets()
 	]]
 	currentPets = {}
 	for i=1,7 do
-		local unitTag = UNIT_PLAYER_PET..i		
+		local unitTag = UNIT_PLAYER_PET..i	
 		if IsUnitValidPet(unitTag) then
 			table.insert(currentPets, { unitTag = unitTag, unitName = GetUnitName(unitTag) })
 			zo_callLater(function() UpdatePetStats(unitTag) end, 500)
@@ -1017,8 +1031,8 @@ local function OnAddOnLoaded(_, addonName)
 
 	if isLSCActive then
    	--Build the slash commands if the library LibSlashCommander was found loaded properly
-   		--LSC = LibStub("LibSlashCommander")
-		--SlashCommands()
+   		LSC = LibStub("LibSlashCommander")
+		SlashCommands()
 	end
 
 	-- create ui
