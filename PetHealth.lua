@@ -98,10 +98,15 @@ local function GetPetNameLower(abilityId)
 	local petName
 	--Removing text from Sorc pet ability names to derive pet names / Not currently needed for Warden pets
 	--Unstable Clannfear is abilityId 23319
-	if abilityId == 23319 or abilityId == 23304 then
-		petName = abilityName:gsub("Summon Unstable ","")
+	--if abilityId == 23319 or abilityId == 23304 then
+	if abilityName:match('Summon ') then
+		if abilityName:match('Summon Unstable ') then 
+			petName = abilityName:gsub("Summon Unstable ","")
+		else
+			petName = abilityName:gsub("Summon ","")
+		end
 	else
-		petName = abilityName:gsub("Summon ","")
+		petName = abilityName
 	end
 	return zo_strformat("<<z:1>>", petName)
 end
@@ -113,17 +118,23 @@ local validPets = {
 	]]
 	-- Familiar
 	[GetPetNameLower(23304)] = true,
+	["begleiter"] = true, -- de
+	["familier"] = true, -- fr
+	["прислужник"] = true, -- ru
 	-- Clannfear
 	[GetPetNameLower(23319)] = true,
 	["clannbann"] = true, -- de
 	["faucheclan"] = true, -- fr
 	["кланфир"] = true, -- ru
 	-- Volatile Familiar
-	[GetPetNameLower(23316)] = true, -- en/de
+	[GetPetNameLower(23316)] = true, -- en
+	["explosiver begleiter"] = true, -- de
+	["familier explosif"] = true, -- fr
 	["взрывной прислужник"] = true, -- ru
 	-- Winged Twilight
 	[GetPetNameLower(24613)] = true, -- en
-	["familier explosif"] = true, -- fr
+	["zwielichtschwinge"] = true, -- de
+	["crépuscule ailé"] = true, -- fr
 	["крылатый сумрак"] = true, -- ru
 	-- Twilight Tormentor
 	[GetPetNameLower(24636)] = true, -- en
@@ -132,7 +143,10 @@ local validPets = {
 	["сумрак-мучитель"] = true, -- ru
 	-- Twilight Matriarch
 	[GetPetNameLower(24639)] = true,
+	["zwielichtmatriarchin"] = true, -- de
+	["matriarche crépusculaire"] = true, -- fr
 	["сумрак-матриарх"] = true, -- ru
+	-- Warden Pets don't seem to need any de/fr localization entries
 	-- Feral Guardian
 	[GetPetNameLower(85982)] = true,
 	["дикий страж"] = true, -- ru
@@ -198,10 +212,10 @@ local function PetUnSummonedAlerts(unitTag)
 end
 
 local function RefreshPetWindow()
-	-- GetSlotBoundId values 3 thru 8 to obtain the slotbar's abiltiyId's (8 is ultimate)
-	--d(GetSlotBoundId(3))
-	--d(GetPetNameLower(GetSlotBoundId(3)))
-	--d(GetAbilityName(23319))
+	--GetSlotBoundId values 3 thru 8 to obtain the slotbar's abiltiyId's (8 is ultimate)
+	-- d(GetSlotBoundId(3))
+	-- d(GetPetNameLower(GetSlotBoundId(3)))
+	-- d(GetAbilityName(23319))
 
 	local countPets = #currentPets
 	local combatState = GetCombatState()
@@ -428,7 +442,7 @@ local function GetActivePets()
 		local unitTag = UNIT_PLAYER_PET..i	
 		if IsUnitValidPet(unitTag) then
 			table.insert(currentPets, { unitTag = unitTag, unitName = GetUnitName(unitTag) })
-			zo_callLater(function() UpdatePetStats(unitTag) end, 500)
+			zo_callLater(function() UpdatePetStats(unitTag) end, 1250)
 		end
 	end
 	-- update
