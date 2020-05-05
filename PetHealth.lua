@@ -9,7 +9,7 @@ PetHealth.supportedClasses = {
 local addon = {
 	name 			= "PetHealth",
 	displayName 	= "PetHealth",
-	version         = "1.09",
+	version         = "1.10",
 	savedVarName	= "PetHealth_Save",
 	savedVarVersion = 2,
 	lamDisplayName 	= "PetHealth",
@@ -266,7 +266,7 @@ local function OnShieldUpdate(handler, unitTag, value, maxValue, initial)
 		return
 	elseif i == 1 then
 		local petOne = currentPets[1].unitName
-		if lowShieldAlertPercentage > 0 and value < maxValue*.01*lowShieldAlertPercentage then
+		if lowShieldAlertPercentage > 1 and value ~= 0 and value < (maxValue*.01*lowShieldAlertPercentage) then
 			if onScreenShieldAlertPetOne == 0 then
 				OnScreenMessage(zo_strformat("|c000099<<1>>\'s <<2>>|r", petOne, GetString(SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG)))
 				onScreenShieldAlertPetOne = 1
@@ -278,7 +278,7 @@ local function OnShieldUpdate(handler, unitTag, value, maxValue, initial)
 		local name = currentPets[i].unitName
 		local petOne = currentPets[1].unitName
 		local petTwo = currentPets[2].unitName
-		if lowShieldAlertPercentage > 0 and value < maxValue*.01*lowShieldAlertPercentage then
+		if lowShieldAlertPercentage > 1 and value ~= 0 and value < (maxValue*.01*lowShieldAlertPercentage) then
 			if name == petOne and onScreenShieldAlertPetOne == 0 then
 				OnScreenMessage(zo_strformat("|c000099<<1>>\'s <<2>>|r", petOne, GetString(SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG)))
 				onScreenShieldAlertPetOne = 1
@@ -346,7 +346,7 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 	--[[
 	Zeigt das Leben des Begleiters an.
 	]]
-	if onlyInCombatHealthPercentage > 0 and savedVars.onlyInCombat == true then
+	if onlyInCombatHealthPercentage > 1 and savedVars.onlyInCombat == true then
 		onlyInCombatHealthMax = powerMax
 		onlyInCombatHealthCurrent = powerValue
 		RefreshPetWindow()
@@ -357,7 +357,7 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 		return
 	elseif i == 1 then
 		local petOne = currentPets[1].unitName
-		if lowHealthAlertPercentage > 0 and powerValue < (powerMax*.01*lowHealthAlertPercentage) then
+		if lowHealthAlertPercentage > 1 and powerValue ~= 0 and powerValue < (powerMax*.01*lowHealthAlertPercentage) then
 			if onScreenHealthAlertPetOne == 0 then
 				OnScreenMessage(zo_strformat("|cff0000<<1>> <<2>>|r", petOne, GetString(SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG)))
 				onScreenHealthAlertPetOne = 1
@@ -369,7 +369,7 @@ local function OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, initial)
 		local name = currentPets[i].unitName
 		local petOne = currentPets[1].unitName
 		local petTwo = currentPets[2].unitName
-		if lowHealthAlertPercentage > 0 and powerValue < (powerMax*.01*lowHealthAlertPercentage) then
+		if lowHealthAlertPercentage > 1 and powerValue ~= 0 and powerValue < (powerMax*.01*lowHealthAlertPercentage) then
 			if name == petOne and onScreenHealthAlertPetOne == 0 then
 				OnScreenMessage(zo_strformat("|cff0000<<1>> <<2>>|r", petOne, GetString(SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG)))
 				onScreenHealthAlertPetOne = 1
