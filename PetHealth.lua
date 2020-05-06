@@ -63,7 +63,7 @@ local WINDOW_MANAGER = GetWindowManager()
 local WINDOW_WIDTH = 250
 local WINDOW_HEIGHT_ONE = 76
 local WINDOW_HEIGHT_TWO = 116
-local PET_BAR_FRAGMENT = nil
+local PET_BAR_FRAGMENT
 
 ----------
 -- UTIL --
@@ -80,10 +80,10 @@ local function ChatOutput(message)
 	CHAT_SYSTEM:AddMessage(message)
 end
 
-local function CheckAddon(addon)
+local function CheckAddon(addonName)
 	for i = 1, AddOnManager:GetNumAddOns() do
-		local name, title, author, description, enabled, state, isOutOfDate = AddOnManager:GetAddOnInfo(i)   
-		if title == addon and enabled == true and state == 2 then
+		local name, title, author, description, enabled, state, isOutOfDate = AddOnManager:GetAddOnInfo(i)
+		if title == addonName and enabled == true and state == 2 then
 			return true
 		end
 	end
@@ -470,7 +470,6 @@ local function CreateWarner()
 		local HEALTH_ALPHA_PULSE_THRESHOLD = 0.25
 
 		local RESOURCE_WARNER_FLASH_TIME  = 300
-		local RESOURCE_WARNER_NUM_FLASHES = 3
 		
 		PetHealthWarner = ZO_Object:Subclass()
 
