@@ -42,18 +42,18 @@ local strings = {
 	SI_PET_HEALTH_LAM_UNSUMMONED_ALERT	= 'Unsummoned Alerts',
 	SI_PET_HEALTH_LAM_UNSUMMONED_ALERT_TT = 'Shows on-screen alerts when a pet is unsummoned or killed',
 	SI_PET_HEALTH_LAM_LOCK_WINDOW		= 'Lock window position',
-	SI_PET_HEALTH_LAM_LOCK_WINDOW_TT	= 'Locks pet health window in its current position',
+	SI_PET_HEALTH_LAM_LOCK_WINDOW_TT	= 'Locks PetHealth window in its current position',
 	SI_PET_HEALTH_LAM_LOW_HEALTH_WARN	= "Low Health Alert Percentage",
-	SI_PET_HEALTH_LAM_LOW_HEALTH_WARN_TT= "Displays an on-screen alert depending on the pet health percentage value chosen - A value of 1 or higher is needed to enable",
+	SI_PET_HEALTH_LAM_LOW_HEALTH_WARN_TT= "Displays an on-screen alert depending on the pet health percentage value chosen - Value of 1 or higher is needed to enable",
 	SI_PET_HEALTH_LAM_LOW_SHIELD_WARN	= "Low Shield Alert Percentage",
-	SI_PET_HEALTH_LAM_LOW_SHIELD_WARN_TT= "Displays an on-screen alert depending on the pet shield percentage value chosen - A value of 1 or higher is needed to enable",
+	SI_PET_HEALTH_LAM_LOW_SHIELD_WARN_TT= "Displays an on-screen alert depending on the pet shield percentage value chosen - Value of 1 or higher is needed to enable",
 	SI_PET_HEALTH_LAM_HEADER_BEHAVIOR   = "Behavior changes",
 	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT	= "Only in combat",
 	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_TT	= "Show the PetHealth UI only if you are in combat",
 	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH	= "Health percent for the only in combat setting",
 	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH_TT	= "Show the PetHealth UI only if you are in combat and a pet is at or below the health percentage",
 	SI_PET_HEALTH_LAM_USE_ZOS_STYLE = "Use ZOS Style",
-	SI_PET_HEALTH_LAM_USE_ZOS_STYLE_TT = "Use the arrow status bars instead of the rectanguler ones",
+	SI_PET_HEALTH_LAM_USE_ZOS_STYLE_TT = "Use the arrow status bars instead of the rectangular ones",
 }
 
 for stringId, stringValue in pairs(strings) do
