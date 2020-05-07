@@ -18,8 +18,8 @@ SafeAddString(SI_PET_HEALTH_LSC_VALUES , "Aktiviere/Deaktiviere die Ressourcenan
 SafeAddString(SI_PET_HEALTH_LSC_LABELS , "Aktiviere/Deaktiviere die Namenanzeige der Begleiter.")
 SafeAddString(SI_PET_HEALTH_LSC_BACKGROUND , "Aktiviere/Deaktiviere den Hintergrund des Begleiterfensters.")
 SafeAddString(SI_PET_HEALTH_LSC_UNSUMMONEDALERTS , "Schalten Sie die Warnmeldungen auf dem Bildschirm um, wenn ein Haustier nicht gesichtet oder getötet wird.")
-SafeAddString(SI_PET_HEALTH_LSC_WARN_HEALTH, "Warnungs-Schwellenwert für Begleiter Leben setzen, in %. Gebe einen Ganzzahligen Wert ohne Vorzeichen zwischen 0 und 99 an!")
-SafeAddString(SI_PET_HEALTH_LSC_WARN_SHIELD, "Warnungs-Schwellenwert für Begleiter Schild setzen, in %. Gebe einen Ganzzahligen Wert ohne Vorzeichen zwischen 0 und 99 an!")
+SafeAddString(SI_PET_HEALTH_LSC_WARN_HEALTH, "Warnungs-Schwellenwert für Begleiter Leben setzen, in %. Gebe einen Ganzzahligen Wert ohne Vorzeichen zwischen 1 und 99 an!")
+SafeAddString(SI_PET_HEALTH_LSC_WARN_SHIELD, "Warnungs-Schwellenwert für Begleiter Schild setzen, in %. Gebe einen Ganzzahligen Wert ohne Vorzeichen zwischen 1 und 99 an!")
 --Low health/shield warnings
 SafeAddString(SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG, "hat wenig Leben!")
 SafeAddString(SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG, "Schild ist schwach!")
