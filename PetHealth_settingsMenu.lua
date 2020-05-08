@@ -171,6 +171,17 @@ function PetHealth.buildLAMAddonMenu()
         },
         {
             type = "checkbox",
+            name = GetString(SI_PET_HEALTH_LAM_HIDE_IN_DUNGEON),
+            tooltip = GetString(SI_PET_HEALTH_LAM_HIDE_IN_DUNGEON_TT),
+            getFunc = function() return settings.hideInDungeon end,
+            setFunc = function(value) settings.hideInDungeon = value
+                PetHealth.hideInDungeon(value)
+            end,
+            default = defaults.hideInDungeon,
+            width="full",
+        },
+        {
+            type = "checkbox",
             name = GetString(SI_PET_HEALTH_LAM_ONLY_IN_COMBAT),
             tooltip = GetString(SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_TT),
             getFunc = function() return settings.onlyInCombat end,

@@ -27,6 +27,7 @@ local default = {
 	onlyInCombat = false,
 	showValues = true,
 	showLabels = true,
+	hideInDungeon = false,
 	lockWindow = false,
 	lowHealthAlertSlider = 0,
 	lowShieldAlertSlider = 0,
@@ -42,10 +43,12 @@ local UNIT_PLAYER_TAG = "player"
 
 local base, background, savedVars--, savedVarCopy
 local currentPets = {}
+local PetHealthWarner
 local window = {}
 local inCombatAddon = false
 
 local AddOnManager = GetAddOnManager()
+local hideInDungeon = false
 local LSC
 local lockWindow = false
 local lowHealthAlertPercentage = 0
@@ -67,11 +70,10 @@ local PET_BAR_FRAGMENT
 
 ----------
 -- UTIL --
----------- 
-
+----------
 local function OnScreenMessage(message)
 	local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
-	messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN) 
+	messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
 	messageParams:SetText(message)
 	CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
 end
@@ -216,7 +218,7 @@ local function RefreshPetWindow()
 	-- d(GetSlotBoundId(3))
 	-- d(GetPetNameLower(GetSlotBoundId(3)))
 	-- d(GetAbilityName(23319))
-
+	local inDungeon = IsUnitInDungeon("player")
 	local countPets = #currentPets
 	local combatState = GetCombatState()
 	if PET_BAR_FRAGMENT:IsHidden() and countPets == 0 and combatState then
@@ -244,6 +246,9 @@ local function RefreshPetWindow()
 			setToHidden = true
 		end
 	end
+	if inDungeon == true and savedVars.hideInDungeon == true then
+		setToHidden = true
+	end
 	base:SetHeight(height)
 	background:SetHeight(height)
 	-- set hidden state
@@ -251,7 +256,6 @@ local function RefreshPetWindow()
 	-- debug
 	--ChatOutput(string.format("RefreshPetWindow() countPets: %d", countPets))
 end
-
 
 ------------
 -- SHIELD --
@@ -338,7 +342,6 @@ local function GetShield(unitTag)
 	OnShieldUpdate(_, unitTag, value, maxValue, "true")
 end
 
-
 ------------
 -- HEALTH --
 ------------
@@ -404,7 +407,6 @@ local function GetHealth(unitTag)
 	OnHealthUpdate(_, unitTag, _, _, powerValue, powerMax, "true")
 end
 
-
 -----------
 -- STATS --
 -----------
@@ -431,8 +433,6 @@ local function UpdatePetStats(unitTag)
 	--ChatOutput(string.format("UpdatePetStats() unitTag: %s, name: %s", unitTag, name))
 end
 
-
-
 local function GetActivePets()
 	--[[
 	Hier werden alle Begleiter des Spielers ausgelesen und in die Begleitertabelle geschrieben.
@@ -442,11 +442,11 @@ local function GetActivePets()
 		local unitTag = UNIT_PLAYER_PET..i	
 		if IsUnitValidPet(unitTag) then
 			table.insert(currentPets, { unitTag = unitTag, unitName = GetUnitName(unitTag) })
-			zo_callLater(function() UpdatePetStats(unitTag) end, 1250)
+			UpdatePetStats(unitTag)
 		end
 	end
 	-- update
-	RefreshPetWindow()
+	zo_callLater(function() RefreshPetWindow() end, 300)
 end
 
 -----------
@@ -462,8 +462,6 @@ local function OnPlayerCombatState(_, inCombat)
 	-- refresh
 	RefreshPetWindow()
 end
-
-local PetHealthWarner
 
 local function CreateWarner()
 	if savedVars.useZosStyle then
@@ -650,7 +648,6 @@ local function CreateControls()
 	else
 		local CHILD_DIRECTIONS = { "Left", "Right", "Center" }
 
-
 		local function SetColors(self)
 			local powerType = self.powerType
 			local gradient = ZO_POWER_BAR_GRADIENT_COLORS[powerType]
@@ -779,7 +776,6 @@ local function CreateControls()
 	PET_BAR_FRAGMENT:SetHiddenForReason("NoPetOrOnlyInCombat", true)
 end
 
-
 ----------
 -- INIT --
 ----------
@@ -804,6 +800,7 @@ local function LoadEvents()
 				for i = 1, countPets do
 					local name = currentPets[i].unitName
 					local control = window[i].label
+					unitTag = currentPets[i].unitTag
 					if GetControlText(control) ~= name then
 						window[i].label:SetText(name)
 					end
@@ -812,7 +809,7 @@ local function LoadEvents()
 				end
 			end
 			RefreshPetWindow()
-		end	
+		end
 	end)
 	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_PLAYER_DEAD, GetActivePets)
 	EVENT_MANAGER:RegisterForEvent(addon.name, EVENT_UNIT_DEATH_STATE_CHANGE, GetActivePets)
@@ -857,6 +854,9 @@ function PetHealth.changeCombatState()
 	OnPlayerCombatState(_, IsUnitInCombat(UNIT_PLAYER_TAG))
 end
 
+function PetHealth.hideInDungeon(toValue)
+	hideInDungeon = toValue
+end
 
 function PetHealth.changeBackground(toValue)
 	background:SetAlpha(GetAlphaFromControl(toValue))
@@ -917,6 +917,16 @@ local function SlashCommands()
 		end
 		PetHealth.changeCombatState()
 	end, GetString(SI_PET_HEALTH_LSC_COMBAT))
+
+	LSC:Register("/pethealthhideindungeon", function()
+		savedVars.hideInDungeon = not savedVars.hideInDungeon
+		if savedVars.hideInDungeon then
+			ChatOutput(GetString(SI_PET_HEALTH_HIDE_IN_DUNGEON_ACTIVATED))
+		else
+			ChatOutput(GetString(SI_PET_HEALTH_HIDE_IN_DUNGEON_DEACTIVATED))
+		end
+		PetHealth.hideInDungeon()
+	end, GetString(SI_PET_HEALTH_LSC_DUNGEON))
 	
 	LSC:Register("/pethealthvalues", function()
 		savedVars.showValues = not savedVars.showValues
