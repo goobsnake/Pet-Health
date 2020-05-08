@@ -10,6 +10,8 @@ local strings = {
 	SI_PET_HEALTH_UNSUMMONEDALERTS_ACTIVATED = "Оповещение о состоянии питомца включены.",
 	SI_PET_HEALTH_UNSUMMONEDALERTS_DEACTIVATED = "Оповещение о состоянии питомца отключены.",
 	SI_PET_HEALTH_CLASS = "Ваш класс не поддерживается этим дополнением.",
+	SI_PET_HEALTH_HIDE_IN_DUNGEON_ACTIVATED = "Окно здоровья питомца в подземельях будет скрыто.",
+	SI_PET_HEALTH_HIDE_IN_DUNGEON_DEACTIVATED = "Окно здоровья питомца в подземельях будет показано.",
 	-- SLASH COMMANDS
 	SI_PET_HEALTH_LSC_DEBUG = "Режим отладки.",
 	SI_PET_HEALTH_LSC_COMBAT = "Отоброжать здоровье питомца только в бою.",
@@ -20,6 +22,7 @@ local strings = {
 	SI_PET_HEALTH_LSC_UNSUMMONEDALERTS = "Переключить состояние отображения статуса питомца (не призван / убит).",
 	SI_PET_HEALTH_LSC_WARN_HEALTH = "Установите порог предупреждения в процентах для здоровья домашнего животного. Укажите целое число от 1 до 99 !",
 	SI_PET_HEALTH_LSC_WARN_SHIELD = "Установите порог предупреждения в процентах для щита домашнего животного. Укажите целое число от 1 до 99 !",
+	SI_PET_HEALTH_LSC_DUNGEON = "Переключить отображение окна питомца в подземельях.",
 	--Low health/shield warnings
 	SI_PET_HEALTH_LOW_HEALTH_WARNING_MSG = "сильно ранен!",
 	SI_PET_HEALTH_LOW_SHIELD_WARNING_MSG = "повредил свой щит!",
@@ -53,7 +56,9 @@ local strings = {
 	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH	= "Порог отображения панели здоровья в бою",
 	SI_PET_HEALTH_LAM_ONLY_IN_COMBAT_HEALTH_TT = "Дополнение отображает панель здоровья питомца при значениях ниже или равном указанному.",
 	SI_PET_HEALTH_LAM_USE_ZOS_STYLE = "Использовать ZOS-Style",
-	SI_PET_HEALTH_LAM_USE_ZOS_STYLE_TT = "Use the arrow status bars instead of the rectanguler ones",
+	SI_PET_HEALTH_LAM_USE_ZOS_STYLE_TT = "Используйте стрелки состояния вместо прямоугольных",
+	SI_PET_HEALTH_LAM_HIDE_IN_DUNGEON = "Спрятаться в групповой темнице",
+	SI_PET_HEALTH_LAM_HIDE_IN_DUNGEON_TT = "Скройте окно PetHealth в групповом подземелье - домашние животные больше не получают урон в групповых подземельях",
 }
 
 for stringId, stringValue in pairs(strings) do

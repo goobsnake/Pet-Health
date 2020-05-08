@@ -218,7 +218,6 @@ local function RefreshPetWindow()
 	-- d(GetSlotBoundId(3))
 	-- d(GetPetNameLower(GetSlotBoundId(3)))
 	-- d(GetAbilityName(23319))
-	local inDungeon = IsUnitInDungeon("player")
 	local countPets = #currentPets
 	local combatState = GetCombatState()
 	if PET_BAR_FRAGMENT:IsHidden() and countPets == 0 and combatState then
@@ -246,8 +245,16 @@ local function RefreshPetWindow()
 			setToHidden = true
 		end
 	end
-	if inDungeon == true and savedVars.hideInDungeon == true then
-		setToHidden = true
+	if savedVars.hideInDungeon == true then
+		local inDungeon = IsUnitInDungeon("player")
+		local zoneDifficulty = GetCurrentZoneDungeonDifficulty()
+		--zoneDifficulty 0 is for all overland/non-dungeon content, 1 = normal dungeon/arena/trial, 2 = veteran dungeon/arena/trial
+		if inDungeon == true and zoneDifficulty > 0 then
+			local currentZone = GetUnitZone("player")
+			if currentZone ~= 'Maelstrom Arena' then
+				setToHidden = true
+			end
+		end
 	end
 	base:SetHeight(height)
 	background:SetHeight(height)
@@ -856,6 +863,7 @@ end
 
 function PetHealth.hideInDungeon(toValue)
 	hideInDungeon = toValue
+	RefreshPetWindow()
 end
 
 function PetHealth.changeBackground(toValue)
