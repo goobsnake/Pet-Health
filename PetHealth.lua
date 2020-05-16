@@ -49,6 +49,7 @@ local inCombatAddon = false
 
 local AddOnManager = GetAddOnManager()
 local hideInDungeon = false
+local PetHealth.LAM
 local LSC
 local lockWindow = false
 local lowHealthAlertPercentage = 0
@@ -955,16 +956,18 @@ local function SlashCommands()
 		end
 		PetHealth.changeLabels(savedVars.showLabels)
 	end, GetString(SI_PET_HEALTH_LSC_LABELS))
-	
-	LSC:Register("/pethealthbackground", function()
-		savedVars.showBackground = not savedVars.showBackground
-		if savedVars.showBackground then
-			ChatOutput(GetString(SI_PET_HEALTH_BACKGROUND_ACTIVATED))
-		else
-			ChatOutput(GetString(SI_PET_HEALTH_BACKGROUND_DEACTIVATED))
-		end
-		PetHealth.changeBackground(savedVars.showBackground)
-	end, GetString(SI_PET_HEALTH_LSC_BACKGROUND))
+
+	if not savedVars.useZosStyle then
+		LSC:Register("/pethealthbackground", function()
+			savedVars.showBackground = not savedVars.showBackground
+			if savedVars.showBackground then
+				ChatOutput(GetString(SI_PET_HEALTH_BACKGROUND_ACTIVATED))
+			else
+				ChatOutput(GetString(SI_PET_HEALTH_BACKGROUND_DEACTIVATED))
+			end
+			PetHealth.changeBackground(savedVars.showBackground)
+		end, GetString(SI_PET_HEALTH_LSC_BACKGROUND))
+	end
 
 	LSC:Register("/pethealthunsummonedalerts", function()
 		savedVars.petUnsummonedAlerts = not savedVars.petUnsummonedAlerts
@@ -1056,13 +1059,13 @@ local function OnAddOnLoaded(_, addonName)
 	
 	if isLAMActive then
     --Build the LAM addon menu if the library LibAddonMenu-2.0 was found loaded properly
-    	PetHealth.LAM = LibStub("LibAddonMenu-2.0")
+    	PetHealth.LAM = LibAddonMenu2
 		PetHealth.buildLAMAddonMenu()
 	end
 
 	if isLSCActive then
    	--Build the slash commands if the library LibSlashCommander was found loaded properly
-   		LSC = LibStub("LibSlashCommander")
+		LSC = LibSlashCommander
 		SlashCommands()
 	end
 
