@@ -49,7 +49,7 @@ local inCombatAddon = false
 
 local AddOnManager = GetAddOnManager()
 local hideInDungeon = false
-local PetHealth.LAM
+local LAM
 local LSC
 local lockWindow = false
 local lowHealthAlertPercentage = 0
@@ -1059,7 +1059,8 @@ local function OnAddOnLoaded(_, addonName)
 	
 	if isLAMActive then
     --Build the LAM addon menu if the library LibAddonMenu-2.0 was found loaded properly
-    	PetHealth.LAM = LibAddonMenu2
+    	LAM = LibAddonMenu2
+    	PetHealth.LAM = LAM
 		PetHealth.buildLAMAddonMenu()
 	end
 
