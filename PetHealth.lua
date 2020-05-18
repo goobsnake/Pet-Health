@@ -967,6 +967,10 @@ local function SlashCommands()
 			end
 			PetHealth.changeBackground(savedVars.showBackground)
 		end, GetString(SI_PET_HEALTH_LSC_BACKGROUND))
+	else
+		-- Forcing show background to off for anyone that may have accidentally enabled this when ZOS style frames are enabled
+		showBackground = false
+		savedVars.showBackground = false
 	end
 
 	LSC:Register("/pethealthunsummonedalerts", function()
