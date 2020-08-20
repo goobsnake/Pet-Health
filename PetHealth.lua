@@ -9,7 +9,7 @@ PetHealth.supportedClasses = {
 local addon = {
 	name 			= "PetHealth",
 	displayName 	= "PetHealth",
-	version         = "1.10",
+	version         = "1.11",
 	savedVarName	= "PetHealth_Save",
 	savedVarVersion = 2,
 	lamDisplayName 	= "PetHealth",
@@ -123,7 +123,7 @@ local validPets = {
 	[GetPetNameLower(23304)] = true,
 	["begleiter"] = true, -- de
 	["familier"] = true, -- fr
-	["прислужник"] = true, -- ru
+	["призванный слуга"] = true, -- ru
 	-- Clannfear
 	[GetPetNameLower(23319)] = true,
 	["clannbann"] = true, -- de
@@ -133,7 +133,7 @@ local validPets = {
 	[GetPetNameLower(23316)] = true, -- en
 	["explosiver begleiter"] = true, -- de
 	["familier explosif"] = true, -- fr
-	["взрывной прислужник"] = true, -- ru
+	["взрывной призванный слуга"] = true, -- ru
 	-- Winged Twilight
 	[GetPetNameLower(24613)] = true, -- en
 	["zwielichtschwinge"] = true, -- de
@@ -152,10 +152,10 @@ local validPets = {
 	-- Warden Pets don't seem to need any de/fr localization entries
 	-- Feral Guardian
 	[GetPetNameLower(85982)] = true,
-	["дикий страж"] = true, -- ru
+	["хищный страж"] = true, -- ru
 	-- Eternal Guardian
 	[GetPetNameLower(85986)] = true,
-	["вечный защитник"] = true, -- ru
+	["вечный страж"] = true, -- ru
 	-- Wild Guardian
 	[GetPetNameLower(85990)] = true,
 	["дикий защитник"] = true, -- ru
@@ -166,6 +166,7 @@ local function IsUnitValidPet(unitTag)
 	Hier durchsuchen wir die Tabellen oben, ob wir den unitTag wirklich in unsere Tabelle aufnehmen.
 	]]
 	local unitName = zo_strformat("<<z:1>>", GetUnitName(unitTag))
+	--zo_callLater(function() ChatOutput(unitName) end, 10000)
 	return DoesUnitExist(unitTag) and validPets[unitName]
 end
 
@@ -426,7 +427,7 @@ end
 
 local function UpdatePetStats(unitTag)
 	local i = GetKeyWithData(unitTag)
-	if i == nil then
+	if i == nil or i > 2 then
 		--ChatOutput(string.format("UpdatePetStats() unitTag: %s - pet not active", unitTag))
 		return
 	end
@@ -447,7 +448,7 @@ local function GetActivePets()
 	]]
 	currentPets = {}
 	for i=1,7 do
-		local unitTag = UNIT_PLAYER_PET..i	
+		local unitTag = UNIT_PLAYER_PET..i
 		if IsUnitValidPet(unitTag) then
 			table.insert(currentPets, { unitTag = unitTag, unitName = GetUnitName(unitTag) })
 			UpdatePetStats(unitTag)

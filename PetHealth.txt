@@ -1,11 +1,12 @@
 ## Title: Pet Health
 ## Description: Allows for in-game Pet Health bars!
-## APIVersion: 100030 100031
+## APIVersion: 100031 100032
 ## Author: Scootworks & Goobsnake
 ## Contributors: Baertram, chaoticvoid & SheogorathGR
-## AddOnVersion: 1.10
-## Version: 1.10
+## AddOnVersion: 1.11
+## Version: 1.11
 ## SavedVariables: PetHealth_Save
+## DependsOn: LibDebugLogger>=180
 ## OptionalDependsOn: LibSlashCommander LibAddonMenu-2.0
 
 ##Libraries:
