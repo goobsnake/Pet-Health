@@ -6,7 +6,6 @@
 ## AddOnVersion: 1.11
 ## Version: 1.11
 ## SavedVariables: PetHealth_Save
-## DependsOn: LibDebugLogger>=180
 ## OptionalDependsOn: LibSlashCommander LibAddonMenu-2.0
 
 ##Libraries:
